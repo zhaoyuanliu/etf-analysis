@@ -442,15 +442,15 @@
     <label>排序：</label>
     <select id="sortBy">
       <option value="etf_count">涵蓋 ETF 數 (多→少)</option>
-      <option value="total_capital">總資金 (高→低)</option>
+      <option value="total_capital" selected>總資金 (高→低)</option>
       <option value="max_weight">最高權重% (高→低)</option>
       <option value="total_shares">總張數 (多→少)</option>
       <option value="ticker">代號</option>
     </select>
     <label>最少涵蓋：</label>
     <select id="minCoverage">
-      <option value="1">全部</option>
-      <option value="2" selected>2 檔以上</option>
+      <option value="1" selected>全部</option>
+      <option value="2">2 檔以上</option>
       <option value="3">3 檔以上</option>
       <option value="4">4 檔以上</option>
       <option value="5">5 檔以上</option>
@@ -566,7 +566,7 @@ function formatCapital(yi) {
 // ── Table rendering ──────────────────────────────────────────────────────
 let expandedRow = null;
 let activeFilters = new Set();
-let sortCol = 'etf_count';
+let sortCol = 'total_capital';
 let sortDir = -1;  // -1 = desc
 
 function getFilteredSorted() {

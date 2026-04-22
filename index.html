@@ -964,6 +964,18 @@
     font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;
     color: var(--text3); margin-bottom: 14px; padding-left: 2px;
   }
+  /* ── Notes input header ── */
+  #notesInputHeader {
+    background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+  }
+  .notes-header-inner { max-width: 800px; margin: 0 auto; }
+  #notesInputHeader .notes-input-area { margin-bottom: 0; }
+  #notesInputHeader .notes-guest-prompt {
+    margin: 0; border: none; background: none;
+    justify-content: center; padding: 8px 0;
+  }
 </style>
 </head>
 <body>
@@ -979,9 +991,25 @@
 </nav>
 
 <!-- ── Shared header ──────────────────────────────────────────────────── -->
-<div class="header">
+<div class="header" id="mainHeader">
   <h1>台灣 <span>ETF</span> 成分股交叉分析</h1>
   <p class="header-sub">含被動式 + 主動式 ETF &nbsp;|&nbsp; 資料日期：<b>2026/04/22</b> &nbsp;|&nbsp; 點擊個股展開各 ETF 明細</p>
+</div>
+
+<!-- ── Notes input header (replaces main header on notes page) ── -->
+<div id="notesInputHeader" style="display:none">
+  <div class="notes-header-inner">
+    <div id="notesInputArea" class="notes-input-area">
+      <textarea class="notes-textarea" id="noteTextarea" placeholder="寫下你的想法、ETF 觀察或對本站的反饋..."></textarea>
+      <div class="notes-input-footer">
+        <span class="notes-counter" id="notesCounter">0 / 15 筆</span>
+        <button class="btn-submit-note" id="btnSubmitNote">送出想法</button>
+      </div>
+    </div>
+    <div id="notesGuestPrompt" class="notes-guest-prompt" style="display:none">
+      💬 登入後即可留言
+    </div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════════════
@@ -1058,16 +1086,6 @@
 ══════════════════════════════════════════════════════════════════════ -->
 <div id="page-notes" class="page" style="display:none">
 <div class="notes-page">
-  <div id="notesInputArea" class="notes-input-area">
-    <textarea class="notes-textarea" id="noteTextarea" placeholder="寫下你的想法、ETF 觀察或對本站的反饋..."></textarea>
-    <div class="notes-input-footer">
-      <span class="notes-counter" id="notesCounter">0 / 15 筆</span>
-      <button class="btn-submit-note" id="btnSubmitNote">送出筆記</button>
-    </div>
-  </div>
-  <div id="notesGuestPrompt" class="notes-guest-prompt" style="display:none">
-    💬 登入後即可留言
-  </div>
   <div class="notes-section-title">所有用戶筆記</div>
   <div class="notes-list" id="notesList"><div class="notes-empty">載入中...</div></div>
 </div>
@@ -1112,12 +1130,15 @@ function showPage(name) {
   document.getElementById('page-' + name).style.display = '';
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
+  const isNotes = name === 'notes';
+  document.getElementById('mainHeader').style.display        = isNotes ? 'none' : '';
+  document.getElementById('notesInputHeader').style.display  = isNotes ? '' : 'none';
   if (name === 'history') {
     renderHistoryWall();
     renderHistoryETFTabs();
     renderHistoryContent();
   }
-  if (name === 'notes' && typeof window.onNotesPageOpen === 'function') {
+  if (isNotes && typeof window.onNotesPageOpen === 'function') {
     window.onNotesPageOpen();
   }
 }

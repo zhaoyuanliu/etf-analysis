@@ -991,9 +991,79 @@
     margin: 0; border: none; background: none;
     justify-content: center; padding: 8px 0;
   }
+
+  /* ── Announcement modal ─────────────────────────────────────────── */
+  .ann-modal {
+    position: fixed; inset: 0; z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .ann-modal.show { opacity: 1; pointer-events: auto; }
+  .ann-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .ann-card {
+    position: relative;
+    background: linear-gradient(180deg, var(--bg2) 0%, var(--bg3) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px 36px 28px;
+    max-width: 480px; width: calc(100% - 40px);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(88,166,255,0.15);
+    transform: translateY(14px) scale(0.97);
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  .ann-modal.show .ann-card { transform: translateY(0) scale(1); }
+  .ann-close {
+    position: absolute; top: 10px; right: 12px;
+    width: 32px; height: 32px;
+    border: none; background: transparent;
+    color: var(--text2); cursor: pointer;
+    font-size: 22px; line-height: 1;
+    border-radius: 50%;
+    transition: background 0.15s, color 0.15s;
+  }
+  .ann-close:hover { background: var(--bg3); color: var(--text); }
+  .ann-icon {
+    font-size: 40px; text-align: center;
+    margin-bottom: 6px;
+  }
+  .ann-title {
+    text-align: center;
+    font-size: 20px; font-weight: 700;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .ann-body {
+    color: var(--text);
+    font-size: 14.5px; line-height: 1.75;
+    margin-bottom: 22px;
+  }
+  .ann-body b { color: var(--accent); }
+  .ann-body p { margin-bottom: 4px; }
+  .ann-body .ann-sub { color: var(--text2); font-size: 13px; margin-top: 10px; }
+  .ann-ok {
+    display: block; width: 100%;
+    background: var(--accent); color: #0d1117;
+    border: none; padding: 10px 20px;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-weight: 600; font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .ann-ok:hover { background: #79b8ff; transform: translateY(-1px); }
+  .ann-ok:active { transform: translateY(0); }
 </style>
 </head>
 <body>
+
+<!-- ── Announcement modal (first-visit popup) ───────────────────────── -->
+
 
 <!-- ── Sticky page tab navigation ─────────────────────────────────────── -->
 <nav class="tab-nav">
@@ -1762,6 +1832,32 @@ if (HISTORY_DATA.length > 0) {
     else      { renderLoggedOut();   }
     updateInputArea(user);
   });
+</script>
+
+<!-- ── Announcement modal popup ─────────────────────────────────────── -->
+<script>
+(function() {
+  const VERSION = '';
+  if (!VERSION) return;                                       // announcement disabled
+  const modal = document.getElementById('announceModal');
+  if (!modal) return;
+  const KEY = 'etf_ann_dismissed_' + VERSION;
+  try { if (localStorage.getItem(KEY) === '1') return; } catch (e) {}
+
+  // show on next frame so transition runs
+  requestAnimationFrame(() => modal.classList.add('show'));
+
+  const close = () => {
+    modal.classList.remove('show');
+    try { localStorage.setItem(KEY, '1'); } catch (e) {}
+    setTimeout(() => { if (modal.parentNode) modal.parentNode.removeChild(modal); }, 300);
+  };
+
+  modal.querySelectorAll('[data-ann-close]').forEach(el => el.addEventListener('click', close));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modal.classList.contains('show')) close();
+  });
+})();
 </script>
 </body>
 </html>

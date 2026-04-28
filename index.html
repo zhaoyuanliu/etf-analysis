@@ -1339,8 +1339,6 @@
   <div class="section-title">ETF 一覽</div>
   <div class="etf-grid" id="etfGrid"></div>
 
-  <div class="stats-bar" id="statsBar"></div>
-
   <!-- ── 情有獨鍾 section ── -->
   <div class="unique-section" id="uniqueSection">
     <div class="unique-section-header" onclick="toggleUniqueSection()">
@@ -1349,7 +1347,7 @@
         <span id="uniqueCountBadge" class="unique-count-badge"></span>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:11px;color:var(--text3)">僅被單一 ETF 持有的成分股</span>
+        <span style="font-size:11px;color:var(--text3)">全域僅被一個實體（ETF 或我的持股）持有</span>
         <span id="uniqueToggleIcon" style="font-size:12px;color:var(--text3);transition:transform 0.2s">▼</span>
       </div>
     </div>
@@ -1371,6 +1369,8 @@
       </table>
     </div>
   </div>
+
+  <div class="stats-bar" id="statsBar"></div>
 
   <div class="controls">
     <label>最少涵蓋：</label>
@@ -1623,25 +1623,40 @@ let sortDir = -1;
 function getFilteredSorted() {
   const minCov = parseInt(document.getElementById('minCoverage').value);
   const q = document.getElementById('search').value.trim().toLowerCase();
-
   const hasPortfolioFilter = activeFilters.has('MY_PORTFOLIO');
   const etfFilters = new Set([...activeFilters].filter(f => f !== 'MY_PORTFOLIO'));
+  const anyFilter = hasPortfolioFilter || etfFilters.size > 0;
 
-  let rows = CROSS_DATA.filter(r => {
-    if (hasPortfolioFilter && myPortfolio.size > 0) {
-      if (!myPortfolio.has(r.ticker)) return false;
-    } else if (!hasPortfolioFilter) {
-      if (r.etf_count < minCov) return false;
-    }
-    if (q && !r.ticker.toLowerCase().includes(q) && !r.name.toLowerCase().includes(q)) return false;
-    if (etfFilters.size > 0) {
-      const hasAll = [...etfFilters].every(f =>
-        r.etfs.some(e => e.etf_ticker === f)
-      );
-      if (!hasAll) return false;
-    }
-    return true;
-  });
+  let rows;
+
+  const totalSelected = etfFilters.size + (hasPortfolioFilter ? 1 : 0);
+  // Portfolio counts as an entity: effective coverage = etf_count + (1 if in myPortfolio)
+  const portfolioIsEntity = myPortfolio.size > 0;
+  const effectiveCount = r => r.etf_count + (portfolioIsEntity && myPortfolio.has(r.ticker) ? 1 : 0);
+
+  if (!anyFilter) {
+    // No selection: use effective count for minCoverage
+    rows = CROSS_DATA.filter(r => effectiveCount(r) >= minCov);
+  } else if (totalSelected === 1) {
+    // Single entity: keep minCoverage (using effective count) so 情有獨鍾 and 交集表 don't overlap
+    rows = CROSS_DATA.filter(r => {
+      if (effectiveCount(r) < minCov) return false;
+      if (etfFilters.size > 0 && !r.etfs.some(e => etfFilters.has(e.etf_ticker))) return false;
+      if (hasPortfolioFilter && !myPortfolio.has(r.ticker)) return false;
+      return true;
+    });
+  } else {
+    // 2+ entities: AND intersection, bypass minCoverage
+    rows = CROSS_DATA.filter(r => {
+      if (![...etfFilters].every(f => r.etfs.some(e => e.etf_ticker === f))) return false;
+      if (hasPortfolioFilter && !myPortfolio.has(r.ticker)) return false;
+      return true;
+    });
+  }
+
+  if (q) rows = rows.filter(r =>
+    r.ticker.toLowerCase().includes(q) || r.name.toLowerCase().includes(q)
+  );
 
   rows.sort((a, b) => {
     let va = a[sortCol], vb = b[sortCol];
@@ -2012,22 +2027,58 @@ function toggleUniqueSection() {
 }
 
 function renderUniqueTable() {
+  const hasPortfolioFilter = activeFilters.has('MY_PORTFOLIO');
   const etfFilters = new Set([...activeFilters].filter(f => f !== 'MY_PORTFOLIO'));
+  const totalSelected = etfFilters.size + (hasPortfolioFilter ? 1 : 0);
+  // Portfolio counts as a global entity if it has any stocks
+  const portfolioIsEntity = myPortfolio.size > 0;
+  const crossMap = new Map(CROSS_DATA.map(r => [r.ticker, r]));
 
-  let stocks;
-  if (etfFilters.size === 0) {
-    // No ETF selected: globally unique stocks (held by exactly 1 ETF in the full dataset)
-    stocks = CROSS_DATA
-      .filter(r => r.etf_count === 1)
-      .sort((a, b) => b.total_capital - a.total_capital)
-      .map(r => ({ ...r, exclusiveEtf: r.etfs[0] }));
-  } else {
-    // ETFs selected: globally unique stocks (etf_count === 1) held by any of the selected ETFs
-    stocks = CROSS_DATA
-      .filter(r => r.etf_count === 1 && r.etfs.some(e => etfFilters.has(e.etf_ticker)))
-      .sort((a, b) => b.total_capital - a.total_capital)
-      .map(r => ({ ...r, exclusiveEtf: r.etfs[0] }));
+  let stocks = [];
+
+  // ── ETF-globally-unique stocks ─────────────────────────────────────────
+  // etf_count === 1 AND not in portfolio (portfolio would make it 2 entities)
+  CROSS_DATA
+    .filter(r => {
+      if (r.etf_count !== 1) return false;
+      if (portfolioIsEntity && myPortfolio.has(r.ticker)) return false;
+      return true;
+    })
+    .forEach(r => {
+      const etfTicker = r.etfs[0].etf_ticker;
+      // Show when: nothing selected OR the exclusive ETF is selected
+      if (totalSelected === 0 || etfFilters.has(etfTicker)) {
+        stocks.push({ ...r, exclusiveEtf: r.etfs[0] });
+      }
+    });
+
+  // ── Portfolio-globally-unique stocks ───────────────────────────────────
+  // etf_count === 0 AND in myPortfolio (no ETF holds it, only the user does)
+  if (portfolioIsEntity) {
+    myPortfolio.forEach(ticker => {
+      const r = crossMap.get(ticker);
+      if (r && r.etf_count > 0) return; // held by ≥1 ETF → not globally unique to portfolio
+      // Show when: nothing selected OR portfolio card is selected
+      if (totalSelected === 0 || hasPortfolioFilter) {
+        stocks.push({
+          ticker,
+          name: STOCK_NAME[ticker] || ticker,
+          etf_count: 0,
+          etfs: [],
+          total_capital: null,
+          total_shares: null,
+          exclusiveEtf: { etf_ticker: '我的持股', etf_name: '', color: '#58a6ff', weight: null },
+        });
+      }
+    });
   }
+
+  stocks.sort((a, b) => {
+    const aPort = a.exclusiveEtf.etf_ticker === '我的持股' ? 0 : 1;
+    const bPort = b.exclusiveEtf.etf_ticker === '我的持股' ? 0 : 1;
+    if (aPort !== bPort) return aPort - bPort;
+    return (b.total_capital ?? -1) - (a.total_capital ?? -1);
+  });
 
   const badge = document.getElementById('uniqueCountBadge');
   if (badge) badge.textContent = stocks.length + ' 檔';
@@ -2058,12 +2109,12 @@ function renderUniqueTable() {
         <td>
           <span class="etf-pill"
                 style="color:${e.color};border-color:color-mix(in srgb,${e.color} 40%,transparent);background:color-mix(in srgb,${e.color} 12%,transparent)">
-            ${e.etf_ticker} ${e.etf_name}
+            ${e.etf_ticker}${e.etf_name ? ' ' + e.etf_name : ''}
           </span>
         </td>
-        <td class="td-num" style="color:var(--accent)">${e.weight.toFixed(2)}%</td>
-        <td class="td-num" style="color:var(--gold)">${r.total_capital.toFixed(0)}</td>
-        <td class="td-num">${r.total_shares > 0 ? r.total_shares.toLocaleString() : '--'}</td>
+        <td class="td-num" style="color:var(--accent)">${e.weight != null ? e.weight.toFixed(2) + '%' : '-'}</td>
+        <td class="td-num" style="color:var(--gold)">${r.total_capital != null ? r.total_capital.toFixed(0) : '-'}</td>
+        <td class="td-num">${r.total_shares != null ? (r.total_shares > 0 ? r.total_shares.toLocaleString() : '--') : '-'}</td>
       </tr>
     `;
   }).join('');

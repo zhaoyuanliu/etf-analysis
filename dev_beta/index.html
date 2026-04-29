@@ -2815,12 +2815,12 @@ if (HISTORY_DATA.length > 0) {
     if (tosAccepted) {
       if (checkboxRow) checkboxRow.style.display = 'none';
       if (acceptedRow) acceptedRow.style.display = '';
-      if (btnMain) { btnMain.innerHTML = user ? '開始使用' : `${GOOGLE_SVG} 開始使用`; btnMain.disabled = false; }
+      if (btnMain) { btnMain.innerHTML = user ? '開始使用' : `${GOOGLE_SVG} Google 登入使用`; btnMain.disabled = false; }
     } else {
       if (checkboxRow) checkboxRow.style.display = '';
       if (acceptedRow) acceptedRow.style.display = 'none';
       if (btnMain) {
-        btnMain.innerHTML = user ? '我同意' : `${GOOGLE_SVG} 開始使用`;
+        btnMain.innerHTML = user ? '我同意' : `${GOOGLE_SVG} Google 登入使用`;
         btnMain.disabled = true;
       }
     }
@@ -2892,8 +2892,11 @@ if (HISTORY_DATA.length > 0) {
       ? `<img class="user-avatar" src="${user.photoURL}" alt="${user.displayName}" referrerpolicy="no-referrer">`
       : `<div class="user-avatar-fallback">${initial}</div>`;
     authArea.innerHTML = `
-      <div class="user-info">${avatar}<span class="user-name">${user.displayName || user.email}</span></div>
+      <div class="user-info" id="userInfoClickable" style="cursor:pointer" title="查看公告與使用條款">${avatar}<span class="user-name">${user.displayName || user.email}</span></div>
       <button class="btn-logout" id="btnLogout">登出</button>`;
+    document.getElementById('userInfoClickable').addEventListener('click', () =>
+      openCombinedModal(user, { startTab: ANN_VERSION ? 'tos-ann' : 'tos-terms', force: true })
+    );
     document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
   }
 

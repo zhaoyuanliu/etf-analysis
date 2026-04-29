@@ -2858,11 +2858,14 @@ if (HISTORY_DATA.length > 0) {
           if (mode === 'login') {
             const result = await signInWithPopup(auth, provider);
             await recordTosAcceptance(result.user);
+            window._etfAuth = { user: result.user, tosAccepted: true };
+            if (typeof window.onAuthChanged === 'function') window.onAuthChanged();
             _skipNextModal = true;
             closeCombinedModal();
           } else if (mode === 'reaccept') {
             await recordTosAcceptance(currentUser);
             window._etfAuth = { user: currentUser, tosAccepted: true };
+            if (typeof window.onAuthChanged === 'function') window.onAuthChanged();
             closeCombinedModal();
           } else {
             closeCombinedModal();

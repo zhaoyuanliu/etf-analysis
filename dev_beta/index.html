@@ -2789,11 +2789,10 @@ if (HISTORY_DATA.length > 0) {
   // opts.force=true    → bypass state machine gate (e.g. header login click)
   // opts.startTab=id   → force a specific starting tab
   function openCombinedModal(user, opts = {}) {
-    if (_skipNextModal) { _skipNextModal = false; return; }
-    if (!opts.force && !_shouldShowModal(user)) return;
-
     const tosAccepted = checkTosAccepted();
     window._etfAuth = { user, tosAccepted };
+    if (_skipNextModal) { _skipNextModal = false; return; }
+    if (!opts.force && !_shouldShowModal(user)) return;
     const modal = document.getElementById('tosModal');
     if (!modal) return;
 

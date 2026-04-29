@@ -2901,7 +2901,7 @@ if (HISTORY_DATA.length > 0) {
     authArea.innerHTML = `<button class="btn-login" id="btnLogin">${GOOGLE_SVG} 使用 Google 登入</button>`;
     // Op C: clicking login from header → force modal open at 使用條款 tab
     document.getElementById('btnLogin').addEventListener('click', () =>
-      openCombinedModal(null, { force: true })
+      openCombinedModal(null, { startTab: ANN_VERSION ? 'tos-ann' : 'tos-terms', force: true })
     );
   }
 

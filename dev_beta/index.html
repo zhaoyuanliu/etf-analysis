@@ -1546,15 +1546,16 @@
   <div class="tos-backdrop"></div>
   <div class="tos-card">
     <div class="tos-header">
-      <span class="tos-title" id="tosTitle">使用條款與隱私權政策</span>
+      <span class="tos-title" id="tosTitle">公告、使用條款與隱私權政策</span>
       <button class="tos-close" id="tosClose" aria-label="關閉">×</button>
     </div>
     <div class="tos-tabs">
-      <button class="tos-tab-btn" data-tos-tab="tos-terms">使用條款</button>
+      <button class="tos-tab-btn" data-tos-tab="tos-ann">公告</button><button class="tos-tab-btn" data-tos-tab="tos-terms">使用條款</button>
       <button class="tos-tab-btn" data-tos-tab="tos-privacy">隱私權政策</button>
     </div>
     <div class="tos-body" id="tosBody">
-      
+      <section id="tos-ann"><div class="tos-ann-icon">📢</div><div class="tos-ann-title">新增主動式 ETF</div><div class="tos-ann-body"><p>本站已新增 <b>00400A 主動國泰動能高息</b> 主動式 ETF 資料。</p>
+<p class="ann-sub">資料來源：cathaysite.com.tw &nbsp;|&nbsp; 起始日期：2026/04/24</p></div></section>
       <section id="tos-terms">
   <h3>使用條款</h3>
   <p>本網站所提供之 ETF 交叉分析數據（含成分股、張數異動等），為公開資訊彙整，可能存在延遲或誤差，僅供技術研究與資訊分享之用，不構成投資建議，實際數據請以官方公告為準。</p>
@@ -2701,7 +2702,7 @@ if (HISTORY_DATA.length > 0) {
   const MAX_NOTES      = 15;
   const TOS_VERSION        = 'v1';
   const TOS_FORCE_REACCEPT = false;
-  const ANN_VERSION        = '';
+  const ANN_VERSION        = '20260425-00400b';
 
   let currentUser    = null;
   let unsubNotes     = null;

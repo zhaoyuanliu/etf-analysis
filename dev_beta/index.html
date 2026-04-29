@@ -1505,28 +1505,43 @@
     font-size: 10px; color: var(--text3);
     margin-bottom: 10px;
   }
-  .tos-btn-login {
-    width: 100%;
+  .tos-accepted-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0; margin-bottom: 12px;
+    font-size: 13px; color: var(--text2);
+  }
+  .tos-accepted-check { color: #3fb950; font-size: 16px; font-weight: 700; flex-shrink: 0; }
+  .tos-btn-row { display: flex; gap: 8px; }
+  .tos-btn-guest {
+    flex: 1; padding: 10px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text2);
+    font-family: var(--sans); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: border-color 0.15s, color 0.15s;
+  }
+  .tos-btn-guest:hover { border-color: var(--text2); color: var(--text); }
+  .tos-btn-main {
+    flex: 2;
     display: flex; align-items: center; justify-content: center; gap: 8px;
     background: var(--accent); color: #0d1117;
-    border: none; padding: 10px 20px;
+    border: none; padding: 10px 16px;
     border-radius: 8px; font-family: var(--sans);
     font-weight: 600; font-size: 14px;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
+    cursor: pointer; transition: opacity 0.15s, transform 0.1s;
   }
-  .tos-btn-login:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
-  .tos-btn-login:disabled {
-    opacity: 0.35; cursor: not-allowed; transform: none;
-  }
+  .tos-btn-main:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+  .tos-btn-main:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .tos-ann-icon { font-size: 32px; text-align: center; margin-bottom: 8px; }
+  .tos-ann-title { text-align: center; font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .tos-ann-body { color: var(--text2); font-size: 14px; line-height: 1.75; }
+  .tos-ann-body b { color: var(--accent); }
+  .tos-ann-body p { margin-bottom: 4px; }
+  .tos-ann-body .ann-sub { color: var(--text3); font-size: 12px; margin-top: 8px; }
 </style>
 </head>
 <body>
 
-<!-- ── Announcement modal (first-visit popup) ───────────────────────── -->
-
-
-<!-- ── ToS modal (login gate) ───────────────────────────────────────── -->
+<!-- ── Combined modal (entry gate: announcement + TOS) ──────────────── -->
 <div class="tos-modal" id="tosModal" role="dialog" aria-modal="true" aria-labelledby="tosTitle">
   <div class="tos-backdrop"></div>
   <div class="tos-card">
@@ -1535,10 +1550,11 @@
       <button class="tos-close" id="tosClose" aria-label="關閉">×</button>
     </div>
     <div class="tos-tabs">
-      <button class="tos-tab-btn active" data-tos-tab="tos-terms">使用條款</button>
-      <button class="tos-tab-btn"        data-tos-tab="tos-privacy">隱私權政策</button>
+      <button class="tos-tab-btn" data-tos-tab="tos-terms">使用條款</button>
+      <button class="tos-tab-btn" data-tos-tab="tos-privacy">隱私權政策</button>
     </div>
     <div class="tos-body" id="tosBody">
+      
       <section id="tos-terms">
   <h3>使用條款</h3>
   <p>本網站所提供之 ETF 交叉分析數據（含成分股、張數異動等），為公開資訊彙整，可能存在延遲或誤差，僅供技術研究與資訊分享之用，不構成投資建議，實際數據請以官方公告為準。</p>
@@ -1559,16 +1575,23 @@
     </div>
     <div class="tos-footer">
       <div class="tos-effective">生效日期：2026-04-29</div>
-      <div class="tos-checkbox-row">
+      <div class="tos-checkbox-row" id="tosCheckboxRow">
         <input type="checkbox" class="tos-checkbox" id="tosCheckbox">
         <label class="tos-checkbox-label" for="tosCheckbox">
           我已閱讀並同意使用條款與隱私權政策
         </label>
       </div>
-      <button class="tos-btn-login" id="tosBtnLogin" disabled>
-        <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        使用 Google 登入
-      </button>
+      <div class="tos-accepted-row" id="tosAcceptedRow" style="display:none">
+        <span class="tos-accepted-check">✓</span>
+        <span>我已閱讀並同意使用條款與隱私權政策（2026-04-29 生效）</span>
+      </div>
+      <div class="tos-btn-row">
+        <button class="tos-btn-guest" id="tosBtnGuest">訪客模式</button>
+        <button class="tos-btn-main" id="tosBtnMain" disabled>
+          <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          開始使用
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -2676,11 +2699,13 @@ if (HISTORY_DATA.length > 0) {
   const NOTES_COL      = collection(db, 'notes');
   const TOS_ACPT_COL   = collection(db, 'tos_acceptances');
   const MAX_NOTES      = 15;
-  const TOS_VERSION    = 'v1';
-  const TOS_FORCE_REACCEPT = true;
+  const TOS_VERSION        = 'v1';
+  const TOS_FORCE_REACCEPT = false;
+  const ANN_VERSION        = '';
 
-  let currentUser = null;
-  let unsubNotes  = null;
+  let currentUser    = null;
+  let unsubNotes     = null;
+  let _skipNextModal = false;
 
   // Bridge object: main script reads this for portfolio limit decisions
   window._etfAuth = { user: null, tosAccepted: false };
@@ -2700,7 +2725,7 @@ if (HISTORY_DATA.length > 0) {
     if (!TOS_VERSION) return;
     try { localStorage.setItem('tos_accepted_version', TOS_VERSION); } catch(e) {}
     try {
-      const tosContent = (document.getElementById('tosBody')?.innerText || '').slice(0, 5000);
+      const tosContent = (document.getElementById('tosBody')?.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 5000);
       await addDoc(TOS_ACPT_COL, {
         uid:        user.uid,
         email:      user.email || '',
@@ -2712,85 +2737,105 @@ if (HISTORY_DATA.length > 0) {
     } catch(e) { console.warn('tos_acceptances write failed:', e); }
   }
 
-  // ── ToS Modal ────────────────────────────────────────────────────────────
-  function openTosModal() {
+  // ── Combined Modal ────────────────────────────────────────────────────────
+  function closeCombinedModal() {
     const modal = document.getElementById('tosModal');
     if (!modal) return;
-    modal.dataset.tosMode = 'login';
-    const cb  = document.getElementById('tosCheckbox');
-    const btn = document.getElementById('tosBtnLogin');
-    if (cb)  cb.checked  = false;
-    if (btn) {
-      btn.innerHTML = `${GOOGLE_SVG} 使用 Google 登入`;
-      btn.disabled  = true;
+    modal.classList.remove('show');
+    if (ANN_VERSION) {
+      try { localStorage.setItem('etf_ann_dismissed_' + ANN_VERSION, '1'); } catch(e) {}
     }
+  }
+
+  function openCombinedModal(user) {
+    if (_skipNextModal) { _skipNextModal = false; return; }
+    const tosAccepted = checkTosAccepted();
+    window._etfAuth = { user, tosAccepted };
+    const modal = document.getElementById('tosModal');
+    if (!modal) return;
+
+    // Pick first tab: ann if not seen yet, else terms
+    const annSeen = ANN_VERSION && localStorage.getItem('etf_ann_dismissed_' + ANN_VERSION) === '1';
+    const firstId = (ANN_VERSION && !annSeen) ? 'tos-ann' : 'tos-terms';
+    modal.querySelectorAll('.tos-tab-btn').forEach(b => b.classList.remove('active'));
+    modal.querySelectorAll('#tosBody section').forEach(s => s.classList.remove('active'));
+    const firstBtn = modal.querySelector(`.tos-tab-btn[data-tos-tab="${firstId}"]`);
+    if (firstBtn) firstBtn.classList.add('active');
+    document.getElementById(firstId)?.classList.add('active');
+
+    const cb          = document.getElementById('tosCheckbox');
+    const checkboxRow = document.getElementById('tosCheckboxRow');
+    const acceptedRow = document.getElementById('tosAcceptedRow');
+    const btnGuest    = document.getElementById('tosBtnGuest');
+    const btnMain     = document.getElementById('tosBtnMain');
+    if (cb) cb.checked = false;
+
+    if (tosAccepted) {
+      if (checkboxRow) checkboxRow.style.display = 'none';
+      if (acceptedRow) acceptedRow.style.display = '';
+      if (btnMain) { btnMain.innerHTML = '開始使用'; btnMain.disabled = false; }
+    } else {
+      if (checkboxRow) checkboxRow.style.display = '';
+      if (acceptedRow) acceptedRow.style.display = 'none';
+      if (btnMain) {
+        btnMain.innerHTML = user ? '我同意' : `${GOOGLE_SVG} 開始使用`;
+        btnMain.disabled = true;
+      }
+    }
+    if (btnGuest) btnGuest.style.display = user ? 'none' : '';
+    modal.dataset.tosMode = user ? (tosAccepted ? 'dismiss' : 'reaccept') : (tosAccepted ? 'dismiss' : 'login');
     requestAnimationFrame(() => modal.classList.add('show'));
   }
 
-  function closeTosModal() {
-    const modal = document.getElementById('tosModal');
-    if (modal) modal.classList.remove('show');
-  }
-
-  function initTosModal() {
+  function initCombinedModal() {
     const modal = document.getElementById('tosModal');
     if (!modal) return;
 
-    // Tab switching — activate first section on load
-    const sections = modal.querySelectorAll('#tosBody section');
-    if (sections.length) sections[0].classList.add('active');
-
+    // Tab switching
     modal.querySelectorAll('.tos-tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         modal.querySelectorAll('.tos-tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         const target = btn.dataset.tosTab;
-        sections.forEach(s => s.classList.toggle('active', s.id === target));
+        modal.querySelectorAll('#tosBody section').forEach(s => s.classList.toggle('active', s.id === target));
       });
     });
 
-    // Checkbox enables confirm button
     const checkbox = document.getElementById('tosCheckbox');
-    const loginBtn = document.getElementById('tosBtnLogin');
-    if (checkbox && loginBtn) {
+    const btnMain  = document.getElementById('tosBtnMain');
+    if (checkbox && btnMain) {
       checkbox.addEventListener('change', () => {
-        loginBtn.disabled = !checkbox.checked;
+        const mode = modal.dataset.tosMode;
+        if (mode === 'login' || mode === 'reaccept') btnMain.disabled = !checkbox.checked;
       });
-      loginBtn.addEventListener('click', async () => {
-        if (!checkbox.checked) return;
-        loginBtn.disabled = true;
-        const mode = modal.dataset.tosMode || 'login';
+      btnMain.addEventListener('click', async () => {
+        const mode = modal.dataset.tosMode;
+        if ((mode === 'login' || mode === 'reaccept') && !checkbox.checked) return;
+        btnMain.disabled = true;
         try {
-          if (mode === 'reaccept') {
-            await recordTosAcceptance(currentUser);
-            closeTosModal();
-          } else {
+          if (mode === 'login') {
             const result = await signInWithPopup(auth, provider);
             await recordTosAcceptance(result.user);
-            closeTosModal();
+            _skipNextModal = true;
+            closeCombinedModal();
+          } else if (mode === 'reaccept') {
+            await recordTosAcceptance(currentUser);
+            window._etfAuth = { user: currentUser, tosAccepted: true };
+            closeCombinedModal();
+          } else {
+            closeCombinedModal();
           }
         } catch(err) {
-          console.error('TOS action failed:', err);
-          loginBtn.disabled = false;
+          console.error('Modal action failed:', err);
+          btnMain.disabled = false;
         }
       });
     }
-
-    document.getElementById('tosClose')?.addEventListener('click', closeTosModal);
-  }
-
-  function openTosModalReaccept() {
-    const modal = document.getElementById('tosModal');
-    if (!modal) return;
-    modal.dataset.tosMode = 'reaccept';
-    const btn = document.getElementById('tosBtnLogin');
-    if (btn) {
-      btn.innerHTML = '我同意';
-      btn.disabled = true;
-    }
-    const cb = document.getElementById('tosCheckbox');
-    if (cb) cb.checked = false;
-    requestAnimationFrame(() => modal.classList.add('show'));
+    document.getElementById('tosBtnGuest')?.addEventListener('click', closeCombinedModal);
+    document.getElementById('tosClose')?.addEventListener('click', closeCombinedModal);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && modal.classList.contains('show')) closeCombinedModal();
+    });
   }
 
   // ── Auth UI ──────────────────────────────────────────────────────────────
@@ -2807,13 +2852,7 @@ if (HISTORY_DATA.length > 0) {
 
   function renderLoggedOut() {
     authArea.innerHTML = `<button class="btn-login" id="btnLogin">${GOOGLE_SVG} 使用 Google 登入</button>`;
-    document.getElementById('btnLogin').addEventListener('click', () => {
-      if (checkTosAccepted()) {
-        signInWithPopup(auth, provider).catch(err => console.error('Login failed:', err));
-      } else {
-        openTosModal();
-      }
-    });
+    document.getElementById('btnLogin').addEventListener('click', () => openCombinedModal(null));
   }
 
   // ── Notes ────────────────────────────────────────────────────────────────
@@ -2909,45 +2948,14 @@ if (HISTORY_DATA.length > 0) {
   // ── Auth state ───────────────────────────────────────────────────────────
   onAuthStateChanged(auth, user => {
     currentUser = user;
-    const tosAccepted = checkTosAccepted();
-    window._etfAuth = { user, tosAccepted };
-    if (user) {
-      renderLoggedIn(user);
-      if (TOS_FORCE_REACCEPT && !tosAccepted) openTosModalReaccept();
-    } else {
-      renderLoggedOut();
-    }
+    if (user) { renderLoggedIn(user); }
+    else      { renderLoggedOut(); }
     updateInputArea(user);
+    openCombinedModal(user);
     if (typeof window.onAuthChanged === 'function') window.onAuthChanged();
   });
 
-  initTosModal();
-</script>
-
-<!-- ── Announcement modal popup ─────────────────────────────────────── -->
-<script>
-(function() {
-  const VERSION = '';
-  if (!VERSION) return;                                       // announcement disabled
-  const modal = document.getElementById('announceModal');
-  if (!modal) return;
-  const KEY = 'etf_ann_dismissed_' + VERSION;
-  try { if (localStorage.getItem(KEY) === '1') return; } catch (e) {}
-
-  // show on next frame so transition runs
-  requestAnimationFrame(() => modal.classList.add('show'));
-
-  const close = () => {
-    modal.classList.remove('show');
-    try { localStorage.setItem(KEY, '1'); } catch (e) {}
-    setTimeout(() => { if (modal.parentNode) modal.parentNode.removeChild(modal); }, 300);
-  };
-
-  modal.querySelectorAll('[data-ann-close]').forEach(el => el.addEventListener('click', close));
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && modal.classList.contains('show')) close();
-  });
-})();
+  initCombinedModal();
 </script>
 </body>
 </html>

@@ -1554,8 +1554,7 @@
       <button class="tos-tab-btn" data-tos-tab="tos-privacy">隱私權政策</button>
     </div>
     <div class="tos-body" id="tosBody">
-      <section id="tos-ann"><div class="tos-ann-icon">📢</div><div class="tos-ann-title">新增主動式 ETF</div><div class="tos-ann-body"><p>本站已新增 <b>00400A 主動國泰動能高息</b> 主動式 ETF 資料。</p>
-<p class="ann-sub">資料來源：cathaysite.com.tw &nbsp;|&nbsp; 起始日期：2026/04/24</p></div></section>
+      <section id="tos-ann"><div class="tos-ann-icon">🧮</div><div class="tos-ann-title">平台說明</div><div class="tos-ann-body"><p>為了給您更精準的視覺化分析，我們每日收錄公開數據後，需經人工與系統多次驗證，並於 21:00 統一更新。遇資料異常時將暫沿用前期數據。本站數據不具法律效力，請以官方最新公告為準。</p></div></section>
       <section id="tos-terms">
   <h3>使用條款</h3>
   <p>本網站所提供之 ETF 交叉分析數據（含成分股、張數異動等），為公開資訊彙整，可能存在延遲或誤差，僅供技術研究與資訊分享之用，不構成投資建議，實際數據請以官方公告為準。</p>
@@ -2711,6 +2710,43 @@ if (HISTORY_DATA.length > 0) {
   // Bridge object: main script reads this for portfolio limit decisions
   window._etfAuth = { user: null, tosAccepted: false };
 
+  // ── LocalStorage key constants ─────────────────────────────────────────
+  const LS_GUEST_VISITED  = 'etf_guest_visited';
+  const LS_MODAL_SEEN_IDS = 'etf_modal_seen_ids';
+
+  function _getSeenIds() {
+    try { return new Set(JSON.parse(localStorage.getItem(LS_MODAL_SEEN_IDS) || '[]')); }
+    catch { return new Set(); }
+  }
+  function _markIdSeen(id) {
+    const ids = _getSeenIds(); ids.add(id);
+    try { localStorage.setItem(LS_MODAL_SEEN_IDS, JSON.stringify([...ids])); } catch {}
+  }
+  function _markCurrentContentSeen() {
+    if (ANN_VERSION) _markIdSeen('ann:' + ANN_VERSION);
+    if (TOS_VERSION) _markIdSeen('tos:' + TOS_VERSION);
+  }
+  // Returns which content IDs still need to be acknowledged
+  function _getNeededItems() {
+    const seen = _getSeenIds();
+    const items = [];
+    if (ANN_VERSION && !seen.has('ann:' + ANN_VERSION)) items.push('ann');
+    if (TOS_VERSION) {
+      const stored = localStorage.getItem('tos_accepted_version');
+      const notSeen = !seen.has('tos:' + TOS_VERSION);
+      const forceReaccept = TOS_FORCE_REACCEPT && stored !== TOS_VERSION;
+      if (notSeen || forceReaccept) items.push('tos');
+    }
+    return items;
+  }
+  // State machine gate: should modal auto-show on this page load?
+  function _shouldShowModal(user) {
+    const needed = _getNeededItems();
+    if (needed.length > 0) return true;           // unseen or force-show content
+    if (user) return false;                        // logged-in, nothing pending
+    return localStorage.getItem(LS_GUEST_VISITED) !== '1';  // guest first visit
+  }
+
   const GOOGLE_SVG = `<svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
 
   // ── ToS helpers ──────────────────────────────────────────────────────────
@@ -2739,30 +2775,36 @@ if (HISTORY_DATA.length > 0) {
   }
 
   // ── Combined Modal ────────────────────────────────────────────────────────
-  function closeCombinedModal() {
+  // opts.silent=true → close without marking seen (e.g. programmatic dismiss)
+  function closeCombinedModal(opts = {}) {
     const modal = document.getElementById('tosModal');
     if (!modal) return;
     modal.classList.remove('show');
-    if (ANN_VERSION) {
-      try { localStorage.setItem('etf_ann_dismissed_' + ANN_VERSION, '1'); } catch(e) {}
+    if (!opts.silent) {
+      try { localStorage.setItem(LS_GUEST_VISITED, '1'); } catch {}
+      _markCurrentContentSeen();
     }
   }
 
-  function openCombinedModal(user) {
+  // opts.force=true    → bypass state machine gate (e.g. header login click)
+  // opts.startTab=id   → force a specific starting tab
+  function openCombinedModal(user, opts = {}) {
     if (_skipNextModal) { _skipNextModal = false; return; }
+    if (!opts.force && !_shouldShowModal(user)) return;
+
     const tosAccepted = checkTosAccepted();
     window._etfAuth = { user, tosAccepted };
     const modal = document.getElementById('tosModal');
     if (!modal) return;
 
-    // Pick first tab: ann if not seen yet, else terms
-    const annSeen = ANN_VERSION && localStorage.getItem('etf_ann_dismissed_' + ANN_VERSION) === '1';
-    const firstId = (ANN_VERSION && !annSeen) ? 'tos-ann' : 'tos-terms';
+    // Determine start tab: explicit override → needed items → tos-terms
+    const needed = _getNeededItems();
+    const startTab = opts.startTab || (needed.includes('ann') ? 'tos-ann' : 'tos-terms');
     modal.querySelectorAll('.tos-tab-btn').forEach(b => b.classList.remove('active'));
     modal.querySelectorAll('#tosBody section').forEach(s => s.classList.remove('active'));
-    const firstBtn = modal.querySelector(`.tos-tab-btn[data-tos-tab="${firstId}"]`);
+    const firstBtn = modal.querySelector(`.tos-tab-btn[data-tos-tab="${startTab}"]`);
     if (firstBtn) firstBtn.classList.add('active');
-    document.getElementById(firstId)?.classList.add('active');
+    document.getElementById(startTab)?.classList.add('active');
 
     const cb          = document.getElementById('tosCheckbox');
     const checkboxRow = document.getElementById('tosCheckboxRow');
@@ -2832,8 +2874,10 @@ if (HISTORY_DATA.length > 0) {
         }
       });
     }
-    document.getElementById('tosBtnGuest')?.addEventListener('click', closeCombinedModal);
-    document.getElementById('tosClose')?.addEventListener('click', closeCombinedModal);
+    // Guest mode (Op A): close + mark visited + mark content seen
+    document.getElementById('tosBtnGuest')?.addEventListener('click', () => closeCombinedModal());
+    // × button: same as guest mode — marks visited so modal won't reappear on refresh
+    document.getElementById('tosClose')?.addEventListener('click', () => closeCombinedModal());
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && modal.classList.contains('show')) closeCombinedModal();
     });
@@ -2853,7 +2897,10 @@ if (HISTORY_DATA.length > 0) {
 
   function renderLoggedOut() {
     authArea.innerHTML = `<button class="btn-login" id="btnLogin">${GOOGLE_SVG} 使用 Google 登入</button>`;
-    document.getElementById('btnLogin').addEventListener('click', () => openCombinedModal(null));
+    // Op C: clicking login from header → force modal open at 使用條款 tab
+    document.getElementById('btnLogin').addEventListener('click', () =>
+      openCombinedModal(null, { startTab: 'tos-terms', force: true })
+    );
   }
 
   // ── Notes ────────────────────────────────────────────────────────────────

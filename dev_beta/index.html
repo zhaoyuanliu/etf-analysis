@@ -2700,13 +2700,15 @@ if (HISTORY_DATA.length > 0) {
     if (!TOS_VERSION) return;
     try { localStorage.setItem('tos_accepted_version', TOS_VERSION); } catch(e) {}
     try {
-      await setDoc(doc(db, 'tos_acceptances', `${user.uid}_${TOS_VERSION}`), {
-        uid:       user.uid,
-        email:     user.email || '',
-        version:   TOS_VERSION,
+      const tosContent = (document.getElementById('tosBody')?.innerText || '').slice(0, 5000);
+      await addDoc(TOS_ACPT_COL, {
+        uid:        user.uid,
+        email:      user.email || '',
+        version:    TOS_VERSION,
         acceptedAt: new Date(),
-        userAgent: navigator.userAgent.slice(0, 200),
-      }, { merge: true });
+        userAgent:  navigator.userAgent.slice(0, 200),
+        tosContent,
+      });
     } catch(e) { console.warn('tos_acceptances write failed:', e); }
   }
 
@@ -2714,10 +2716,14 @@ if (HISTORY_DATA.length > 0) {
   function openTosModal() {
     const modal = document.getElementById('tosModal');
     if (!modal) return;
+    modal.dataset.tosMode = 'login';
     const cb  = document.getElementById('tosCheckbox');
     const btn = document.getElementById('tosBtnLogin');
     if (cb)  cb.checked  = false;
-    if (btn) btn.disabled = true;
+    if (btn) {
+      btn.innerHTML = `${GOOGLE_SVG} 使用 Google 登入`;
+      btn.disabled  = true;
+    }
     requestAnimationFrame(() => modal.classList.add('show'));
   }
 
@@ -2743,7 +2749,7 @@ if (HISTORY_DATA.length > 0) {
       });
     });
 
-    // Checkbox enables login button
+    // Checkbox enables confirm button
     const checkbox = document.getElementById('tosCheckbox');
     const loginBtn = document.getElementById('tosBtnLogin');
     if (checkbox && loginBtn) {
@@ -2753,18 +2759,38 @@ if (HISTORY_DATA.length > 0) {
       loginBtn.addEventListener('click', async () => {
         if (!checkbox.checked) return;
         loginBtn.disabled = true;
+        const mode = modal.dataset.tosMode || 'login';
         try {
-          const result = await signInWithPopup(auth, provider);
-          await recordTosAcceptance(result.user);
-          closeTosModal();
+          if (mode === 'reaccept') {
+            await recordTosAcceptance(currentUser);
+            closeTosModal();
+          } else {
+            const result = await signInWithPopup(auth, provider);
+            await recordTosAcceptance(result.user);
+            closeTosModal();
+          }
         } catch(err) {
-          console.error('Login failed:', err);
+          console.error('TOS action failed:', err);
           loginBtn.disabled = false;
         }
       });
     }
 
     document.getElementById('tosClose')?.addEventListener('click', closeTosModal);
+  }
+
+  function openTosModalReaccept() {
+    const modal = document.getElementById('tosModal');
+    if (!modal) return;
+    modal.dataset.tosMode = 'reaccept';
+    const btn = document.getElementById('tosBtnLogin');
+    if (btn) {
+      btn.innerHTML = '我同意';
+      btn.disabled = true;
+    }
+    const cb = document.getElementById('tosCheckbox');
+    if (cb) cb.checked = false;
+    requestAnimationFrame(() => modal.classList.add('show'));
   }
 
   // ── Auth UI ──────────────────────────────────────────────────────────────
@@ -2885,8 +2911,12 @@ if (HISTORY_DATA.length > 0) {
     currentUser = user;
     const tosAccepted = checkTosAccepted();
     window._etfAuth = { user, tosAccepted };
-    if (user) { renderLoggedIn(user); }
-    else      { renderLoggedOut();   }
+    if (user) {
+      renderLoggedIn(user);
+      if (TOS_FORCE_REACCEPT && !tosAccepted) openTosModalReaccept();
+    } else {
+      renderLoggedOut();
+    }
     updateInputArea(user);
     if (typeof window.onAuthChanged === 'function') window.onAuthChanged();
   });

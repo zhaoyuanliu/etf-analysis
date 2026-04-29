@@ -1565,8 +1565,8 @@
   <h4>一、資料收集</h4>
   <p>本網站透過以下方式收集使用者資料：</p>
   <ul>
-    <li><b>Google Analytics 4（GA4）</b>：自動收集頁面瀏覽（page_view）、捲動（scroll）、點擊（click）等行為數據及 IP 位址衍生的地區資訊，由 Google 伺服器處理儲存，用途為改善網站體驗。</li>
     <li><b>Google 登入</b>：登入後本站將在 Google 官方 Firestore 儲存您的 Google 帳號顯示名稱、電子郵件、頭像連結，僅用於顯示留言卡片及識別身份。</li>
+    <li><b>Google Analytics 4（GA4）</b>：自動收集頁面瀏覽（page_view）、捲動（scroll）、點擊（click）等行為數據及 IP 位址衍生的地區資訊，由 Google 伺服器處理儲存，用途為改善網站體驗。</li>
     <li><b>使用條款同意紀錄</b>：系統會記錄您同意條款的版本與時間，用於解鎖進階功能（如持股上限擴充至 10 檔）。</li>
   </ul>
   <h4>二、資料使用目的</h4>
@@ -2815,7 +2815,7 @@ if (HISTORY_DATA.length > 0) {
     if (tosAccepted) {
       if (checkboxRow) checkboxRow.style.display = 'none';
       if (acceptedRow) acceptedRow.style.display = '';
-      if (btnMain) { btnMain.innerHTML = '開始使用'; btnMain.disabled = false; }
+      if (btnMain) { btnMain.innerHTML = user ? '開始使用' : `${GOOGLE_SVG} 開始使用`; btnMain.disabled = false; }
     } else {
       if (checkboxRow) checkboxRow.style.display = '';
       if (acceptedRow) acceptedRow.style.display = 'none';
@@ -2825,7 +2825,7 @@ if (HISTORY_DATA.length > 0) {
       }
     }
     if (btnGuest) btnGuest.style.display = user ? 'none' : '';
-    modal.dataset.tosMode = user ? (tosAccepted ? 'dismiss' : 'reaccept') : (tosAccepted ? 'dismiss' : 'login');
+    modal.dataset.tosMode = user ? (tosAccepted ? 'dismiss' : 'reaccept') : 'login';
     requestAnimationFrame(() => modal.classList.add('show'));
   }
 
@@ -2852,7 +2852,7 @@ if (HISTORY_DATA.length > 0) {
       });
       btnMain.addEventListener('click', async () => {
         const mode = modal.dataset.tosMode;
-        if ((mode === 'login' || mode === 'reaccept') && !checkbox.checked) return;
+        if ((mode === 'login' || mode === 'reaccept') && !checkbox.checked && !checkTosAccepted()) return;
         btnMain.disabled = true;
         try {
           if (mode === 'login') {

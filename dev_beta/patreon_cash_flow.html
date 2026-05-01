@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patreon 贊助解鎖 - ETF 成分股分析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d1117;
+    --bg2:       #161b22;
+    --bg3:       #1f2937;
+    --border:    #30363d;
+    --border2:   #21262d;
+    --text:      #e6edf3;
+    --text2:     #8b949e;
+    --text3:     #6e7681;
+    --accent:    #58a6ff;
+    --green:     #3fb950;
+    --red:       #f85149;
+    --gold:      #d29922;
+    --radius:    10px;
+    --radius-lg: 16px;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Noto Sans TC', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 24px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(88,166,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header h1 {
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    position: relative;
+  }
+  .header h1 span { color: var(--gold); }
+  .header-sub {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text2);
+    position: relative;
+  }
+
+  /* ── Container ── */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  /* ── State Sections ── */
+  .state { display: none; }
+  .state.active { display: block; animation: fadeIn 0.3s ease-in; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Locked State (尚有名額) ── */
+  .locked-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px 32px;
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .lock-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .tier-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  /* ── Progress Bar ── */
+  .progress-section {
+    margin: 24px 0;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green) 0%, var(--accent) 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  .progress-text {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 4px;
+  }
+
+  .remaining-slots {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    padding: 8px 12px;
+    background: rgba(88, 166, 255, 0.1);
+    border-radius: var(--radius);
+    display: inline-block;
+    margin-bottom: 24px;
+  }
+
+  /* ── Features List ── */
+  .features {
+    text-align: left;
+    margin: 24px 0;
+    padding: 24px;
+    background: var(--bg3);
+    border-radius: var(--radius);
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .feature-item:last-child { margin-bottom: 0; }
+
+  .feature-check {
+    color: var(--green);
+    margin-right: 12px;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  /* ── CTA Buttons ── */
+  .cta-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent) 0%, #4a9eff 100%);
+    color: #0d1117;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(88, 166, 255, 0.3);
+  }
+
+  .btn-secondary {
+    background: var(--bg3);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(88, 166, 255, 0.1);
+  }
+
+  /* ── Sold Out State ── */
+  .soldout-section {
+    background: var(--bg2);
+    border: 2px solid var(--red);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .soldout-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--red);
+    margin-bottom: 16px;
+  }
+
+  .soldout-text {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 24px;
+  }
+
+  /* ── Unlocked State ── */
+  .unlocked-card {
+    background: linear-gradient(135deg, rgba(63, 185, 80, 0.1) 0%, rgba(88, 166, 255, 0.1) 100%);
+    border: 1px solid var(--green);
+    border-radius: var(--radius-lg);
+    padding: 40px 32px;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .unlock-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .unlock-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 12px;
+  }
+
+  .unlock-subtitle {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 24px;
+  }
+
+  .unlock-content {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: left;
+    margin-top: 24px;
+  }
+
+  .unlock-content h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .unlock-content ul {
+    list-style: none;
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .unlock-content li {
+    padding: 8px 0;
+  }
+
+  .unlock-content li::before {
+    content: '→ ';
+    color: var(--green);
+    margin-right: 8px;
+  }
+
+  /* ── Back Button ── */
+  .back-link {
+    display: inline-block;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    transition: background 0.2s;
+  }
+
+  .back-link:hover {
+    background: rgba(88, 166, 255, 0.1);
+  }
+
+  /* ── Loading State ── */
+  .loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--text3);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ── Auth Section (若需要登入) ── */
+  .auth-prompt {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .auth-prompt h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .auth-prompt p {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 24px;
+  }
+
+  .btn-google {
+    background: white;
+    color: #000;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-google:hover {
+    background: #f5f5f5;
+  }
+
+  /* ── Modal for Patreon Content Preview ── */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal.open { display: flex; }
+
+  .modal-content {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .container { padding: 24px 12px; }
+    .locked-card, .unlocked-card, .auth-prompt { padding: 24px 20px; }
+    .tier-name { font-size: 18px; }
+    .cta-buttons { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>🎯 ETF 成分股交叉分析 <span>創始會員方案</span></h1>
+  <div class="header-sub">透過 Patreon 支持創作者，解鎖高級分析工具</div>
+</div>
+
+<div class="container">
+  <a href="etf_analysis.html" class="back-link">← 返回主分析頁面</a>
+
+  <!-- State 1: Auth Required -->
+  <div id="state-auth" class="state">
+    <div class="auth-prompt">
+      <h2>登入開始</h2>
+      <p>請先用 Google 帳號登入，才能進行贊助。</p>
+      <button class="btn btn-google" onclick="mockGoogleSignIn()">
+        🔐 使用 Google 帳號登入
+      </button>
+    </div>
+  </div>
+
+  <!-- State 2: Locked (尚有名額) -->
+  <div id="state-locked" class="state">
+    <div class="locked-card">
+      <div class="lock-icon">🔒</div>
+      <div class="tier-name">創始會員方案</div>
+
+      <div class="progress-section">
+        <div class="progress-text">加入進度</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 82.4%;"></div>
+        </div>
+        <div class="progress-text" id="progressCount">206 / 250 已加入</div>
+        <div class="remaining-slots" id="remainingSlots">
+          剩餘 <span id="remainingNum">44</span> 位
+        </div>
+      </div>
+
+      <div class="features">
+        <div class="feature-item">
+          <span class="feature-check">✓</span>
+          <span>完整 ETF 成分股交叉分析</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-check">✓</span>
+          <span>每週市場信號分析報告</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-check">✓</span>
+          <span>實時數據更新</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-check">✓</span>
+          <span>3 枚 Golden Tickets（邀請好友）</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-check">✓</span>
+          <span>創始會員永久優惠</span>
+        </div>
+      </div>
+
+      <div class="cta-buttons">
+        <button class="btn btn-primary" onclick="openPatreonSubscribe()">
+          立即成為創始會員
+        </button>
+        <button class="btn btn-secondary" onclick="showPatreonPreview()">
+          📄 查看 Patreon 內容預覽
+        </button>
+      </div>
+
+      <div style="margin-top: 24px; font-size: 12px; color: var(--text3);">
+        Step 1: 在 Patreon 完成支付 →
+        <br>Step 2: 返回此頁驗證身份
+      </div>
+    </div>
+  </div>
+
+  <!-- State 3: Locked (額滿) -->
+  <div id="state-soldout" class="state">
+    <div class="soldout-section">
+      <div class="lock-icon">😢</div>
+      <div class="soldout-title">創始名額已滿</div>
+      <div class="soldout-text">
+        感謝 250 位創始會員的支持！<br>
+        創始會員方案目前已滿，請加入等候名單。
+      </div>
+      <div class="cta-buttons">
+        <button class="btn btn-primary" onclick="openWaitlist()">
+          加入 Waitlist（邀請可加速）
+        </button>
+        <button class="btn btn-secondary" onclick="showPatreonPreview()">
+          📄 查看 Patreon 內容
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- State 4: Unlocked -->
+  <div id="state-unlocked" class="state">
+    <div class="unlocked-card">
+      <div class="unlock-icon">✅</div>
+      <div class="unlock-title">歡迎，創始會員</div>
+      <div class="unlock-subtitle">感謝你的支持，所有高級功能已解鎖</div>
+
+      <div class="unlock-content">
+        <h3>🎁 你已獲得</h3>
+        <ul>
+          <li>完整 ETF 成分股交叉分析工具</li>
+          <li>每週市場信號分析報告（PDF 下載）</li>
+          <li>實時數據更新</li>
+          <li>3 枚邀請碼（邀請好友成為成長會員）</li>
+          <li>創始會員社群存取權限（Discord）</li>
+        </ul>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <a href="etf_analysis.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
+          進入完整分析工具
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- State 5: Verifying (驗證中) -->
+  <div id="state-verifying" class="state">
+    <div class="locked-card">
+      <div style="margin-bottom: 16px;">
+        <div class="loading"></div>
+      </div>
+      <div class="tier-name">驗證身份中...</div>
+      <div style="font-size: 13px; color: var(--text2); margin-top: 16px;">
+        正在確認你的 Patreon 會員身份
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Patreon Content Preview -->
+<div id="patreonModal" class="modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closePatreonModal()">✕</button>
+    <h2 style="margin-bottom: 20px;">📺 Patreon 內容預覽</h2>
+
+    <div style="margin-bottom: 20px;">
+      <h3 style="color: var(--accent); font-size: 14px; margin-bottom: 8px;">公開內容（免費瀏覽）</h3>
+      <div style="background: var(--bg3); padding: 12px; border-radius: var(--radius); font-size: 13px; color: var(--text2); line-height: 1.6;">
+        ✓ ETF 分析方法論說明<br>
+        ✓ 本月市場摘要（延遲版）<br>
+        ✓ 樣本分析報告（節選）
+      </div>
+    </div>
+
+    <div>
+      <h3 style="color: var(--green); font-size: 14px; margin-bottom: 8px;">創始會員獨享（付費後解鎖）</h3>
+      <div style="background: var(--bg3); padding: 12px; border-radius: var(--radius); font-size: 13px; color: var(--text2); line-height: 1.6;">
+        ✓ 完整 ETF 成分股交叉分析（每週更新）<br>
+        ✓ 市場信號分析報告（PDF）<br>
+        ✓ 實時數據 API 存取<br>
+        ✓ 選股邏輯深度解析<br>
+        ✓ Discord 社群存取
+      </div>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <a href="https://patreon.com" target="_blank" style="color: var(--accent); font-size: 13px; text-decoration: none;">
+        在 Patreon 上查看完整頁面 →
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js';
+  import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js';
+  import { getFirestore, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js';
+
+  // Firebase Config (與 etf_analysis.html 相同)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEIfjr_uaEcWwqPtKkSKDa6YEVbVoYaLY",
+    authDomain: "sideproject-a1234.firebaseapp.com",
+    projectId: "sideproject-a1234",
+    storageBucket: "sideproject-a1234.appspot.com",
+    messagingSenderId: "447483738231",
+    appId: "1:447483738231:web:a7e65e2b5e0e26f8c4c4c4"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+
+  // 狀態管理
+  function showState(stateName) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    const state = document.getElementById(`state-${stateName}`);
+    if (state) state.classList.add('active');
+  }
+
+  // 監聽 Auth 狀態
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    if (!user) {
+      showState('auth');
+    } else {
+      // 監聽 Patreon 訪問權限
+      const accessRef = doc(db, 'patreonAccess', user.uid);
+      onSnapshot(accessRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.verified && data.tier === 'founders') {
+            showState('unlocked');
+          }
+        } else {
+          updateLockedState();
+        }
+      });
+    }
+  });
+
+  // 更新 Locked State（顯示名額）
+  function updateLockedState() {
+    const campaignRef = doc(db, 'config', 'campaign');
+    onSnapshot(campaignRef, (snap) => {
+      if (snap.exists()) {
+        const { foundersMax, foundersCount } = snap.data();
+        const remaining = foundersMax - foundersCount;
+        const percentage = (foundersCount / foundersMax) * 100;
+
+        document.getElementById('progressFill').style.width = percentage + '%';
+        document.getElementById('progressCount').textContent = `${foundersCount} / ${foundersMax} 已加入`;
+        document.getElementById('remainingNum').textContent = remaining;
+
+        if (remaining <= 0) {
+          showState('soldout');
+        } else {
+          showState('locked');
+        }
+      }
+    }, (error) => {
+      console.log('Firestore not ready, using mock data');
+      useMockData();
+    });
+  }
+
+  // Mock Data（開發用）
+  function useMockData() {
+    const foundersCount = 206;
+    const foundersMax = 250;
+    const remaining = foundersMax - foundersCount;
+    const percentage = (foundersCount / foundersMax) * 100;
+
+    document.getElementById('progressFill').style.width = percentage + '%';
+    document.getElementById('progressCount').textContent = `${foundersCount} / ${foundersMax} 已加入`;
+    document.getElementById('remainingNum').textContent = remaining;
+
+    if (remaining <= 0) {
+      showState('soldout');
+    } else {
+      showState('locked');
+    }
+  }
+
+  // Google 登入（模擬）
+  window.mockGoogleSignIn = async function() {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error('Login error:', error);
+    }
+  };
+
+  // 開啟 Patreon OAuth2 流程
+  window.openPatreonSubscribe = function() {
+    if (!currentUser) {
+      alert('請先登入');
+      return;
+    }
+
+    // 生成 OAuth2 URL
+    const clientId = 'atont0WtRpJbL_dCGF7zqQZLxZAaNmwT8yEvgYYfzCjDFg-59xmaATz4IpLt5zL6';
+    const redirectUri = `${window.location.origin}/etf-analysis/dev_beta/patreon-callback.html`;
+    const scope = 'identity identity[memberships]';
+    const state = currentUser.uid; // 傳遞 Firebase UID
+
+    const oauthUrl = `https://www.patreon.com/oauth2/authorize?` +
+      `response_type=code&` +
+      `client_id=${encodeURIComponent(clientId)}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `scope=${encodeURIComponent(scope)}&` +
+      `state=${encodeURIComponent(state)}`;
+
+    console.log('Opening Patreon OAuth2:', oauthUrl);
+
+    // 開啟 popup
+    const popup = window.open(oauthUrl, 'PatreonAuth', 'width=600,height=800');
+
+    if (!popup) {
+      alert('請允許彈出式視窗');
+      return;
+    }
+
+    // 監聽 popup 的訊息
+    window.addEventListener('message', (event) => {
+      if (event.origin !== window.location.origin) return;
+
+      if (event.data.type === 'patreon_verified') {
+        console.log('Patreon verification success:', event.data);
+        // Firestore onSnapshot 會自動偵測並解鎖
+        // 這裡只需關閉 popup（已在 callback 頁處理）
+      }
+    });
+  };
+
+  // 顯示 Patreon 內容預覽
+  window.showPatreonPreview = function() {
+    document.getElementById('patreonModal').classList.add('open');
+  };
+
+  window.closePatreonModal = function() {
+    document.getElementById('patreonModal').classList.remove('open');
+  };
+
+  // 加入 Waitlist
+  window.openWaitlist = function() {
+    alert('Waitlist 功能即將上線！');
+  };
+
+  // 初始化
+  updateLockedState();
+
+  // ──── 開發模式（可在控制台按 Shift + P 切換狀態）────
+  window.switchState = function(state) {
+    console.log(`Switching to state: ${state}`);
+    showState(state);
+  };
+
+  // 快速切換快捷鍵 (Shift + D 打開 dev panel)
+  document.addEventListener('keydown', (e) => {
+    if (e.shiftKey && e.key === 'D') {
+      const panel = document.getElementById('devPanel');
+      if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+  });
+</script>
+
+<!-- Development Panel -->
+<div id="devPanel" style="
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--bg2);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 12px;
+  z-index: 999;
+  max-width: 250px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text2);
+  display: none;
+">
+  <div style="margin-bottom: 8px; color: var(--accent); font-weight: 600;">🔧 Dev Panel (Shift+D)</div>
+  <button onclick="switchState('auth')" style="display: block; width: 100%; padding: 6px; margin-bottom: 4px; background: var(--bg3); border: 1px solid var(--border); color: var(--text); cursor: pointer; border-radius: 4px;">Auth</button>
+  <button onclick="switchState('locked')" style="display: block; width: 100%; padding: 6px; margin-bottom: 4px; background: var(--bg3); border: 1px solid var(--border); color: var(--text); cursor: pointer; border-radius: 4px;">Locked</button>
+  <button onclick="switchState('soldout')" style="display: block; width: 100%; padding: 6px; margin-bottom: 4px; background: var(--bg3); border: 1px solid var(--border); color: var(--text); cursor: pointer; border-radius: 4px;">Sold Out</button>
+  <button onclick="switchState('unlocked')" style="display: block; width: 100%; padding: 6px; margin-bottom: 4px; background: var(--bg3); border: 1px solid var(--border); color: var(--text); cursor: pointer; border-radius: 4px;">Unlocked</button>
+  <button onclick="switchState('verifying')" style="display: block; width: 100%; padding: 6px; background: var(--bg3); border: 1px solid var(--border); color: var(--text); cursor: pointer; border-radius: 4px;">Verifying</button>
+</div>
+
+</body>
+</html>

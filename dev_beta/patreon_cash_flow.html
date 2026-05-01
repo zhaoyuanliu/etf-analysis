@@ -695,7 +695,7 @@
     // 生成 OAuth2 URL
     const clientId = 'atont0WtRpJbL_dCGF7zqQZLxZAaNmwT8yEvgYYfzCjDFg-59xmaATz4IpLt5zL6';
     const redirectUri = `${window.location.origin}/etf-analysis/dev_beta/patreon-callback.html`;
-    const scope = 'identity identity[memberships]';
+    const scope = 'identity identity.memberships';
     const state = currentUser.uid; // 傳遞 Firebase UID
 
     const oauthUrl = `https://www.patreon.com/oauth2/authorize?` +

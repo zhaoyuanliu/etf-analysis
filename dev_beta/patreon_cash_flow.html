@@ -586,7 +586,7 @@
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js';
   import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js';
-  import { getFirestore, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js';
+  import { getFirestore, doc, onSnapshot, getDoc } from 'https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js';
 
   // Firebase Config (與 etf_analysis.html 相同)
   const firebaseConfig = {
@@ -612,12 +612,29 @@
   }
 
   // 監聽 Auth 狀態
+  async function checkPatreonAccess(user) {
+    const accessRef = doc(db, 'patreonAccess', user.uid);
+    const snap = await getDoc(accessRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data.verified && data.tier === 'founders') {
+        showState('unlocked');
+        return true;
+      }
+    }
+    return false;
+  }
+
   onAuthStateChanged(auth, (user) => {
     currentUser = user;
     if (!user) {
       showState('auth');
     } else {
-      // 監聽 Patreon 訪問權限
+      // 立即讀取一次，再建立即時監聽
+      checkPatreonAccess(user).then(isVerified => {
+        if (!isVerified) updateLockedState();
+      });
+
       const accessRef = doc(db, 'patreonAccess', user.uid);
       onSnapshot(accessRef, (snap) => {
         if (snap.exists()) {
@@ -625,10 +642,15 @@
           if (data.verified && data.tier === 'founders') {
             showState('unlocked');
           }
-        } else {
-          updateLockedState();
         }
       });
+    }
+  });
+
+  // 當用戶從 callback 頁面切回來時重新檢查
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && currentUser) {
+      checkPatreonAccess(currentUser);
     }
   });
 

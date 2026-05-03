@@ -1713,6 +1713,12 @@
 <div class="history-split">
 
   <aside class="history-wall-panel">
+    <a id="patreonUpgradeBtn" href="patreon_pages/patreon_cash_flow.html" style="
+      display:block; margin-bottom:12px; padding:8px 14px;
+      background:linear-gradient(135deg,#d29922,#e3b341);
+      color:#0d1117; border-radius:8px; font-size:13px; font-weight:700;
+      text-align:center; text-decoration:none; letter-spacing:0.3px;
+    ">⭐ 升級創始會員</a>
     <div class="section-title">動態牆</div>
     <div id="historyWall"></div>
   </aside>
@@ -2678,7 +2684,7 @@ if (HISTORY_DATA.length > 0) {
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
-  import { getFirestore, collection, addDoc, deleteDoc, setDoc, doc, query, orderBy, onSnapshot }
+  import { getFirestore, collection, addDoc, deleteDoc, setDoc, doc, query, orderBy, onSnapshot, getDoc }
     from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -2999,6 +3005,21 @@ if (HISTORY_DATA.length > 0) {
   window.onNotesPageOpen = () => updateInputArea(currentUser);
 
   // ── Auth state ───────────────────────────────────────────────────────────
+  async function updatePatreonBtn(user) {
+    const btn = document.getElementById('patreonUpgradeBtn');
+    if (!btn || !user) return;
+    try {
+      const snap = await getDoc(doc(db, 'patreonAccess', user.uid));
+      if (snap.exists() && snap.data().verified && snap.data().tier === 'founders') {
+        btn.textContent = '✅ 創始會員已開通';
+        btn.style.background = 'linear-gradient(135deg,#238636,#3fb950)';
+        btn.style.color = '#fff';
+        btn.style.pointerEvents = 'none';
+        btn.style.opacity = '0.85';
+      }
+    } catch (_) {}
+  }
+
   onAuthStateChanged(auth, user => {
     currentUser = user;
     if (user) { renderLoggedIn(user); }
@@ -3006,6 +3027,7 @@ if (HISTORY_DATA.length > 0) {
     updateInputArea(user);
     openCombinedModal(user);
     if (typeof window.onAuthChanged === 'function') window.onAuthChanged();
+    updatePatreonBtn(user);
   });
 
   initCombinedModal();

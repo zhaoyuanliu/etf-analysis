@@ -419,7 +419,7 @@
 </div>
 
 <div class="container">
-  <a href="index.html" class="back-link">← 返回主分析頁面</a>
+  <a href="../index.html" class="back-link">← 返回主分析頁面</a>
 
   <!-- State 1: Auth Required -->
   <div id="state-auth" class="state">
@@ -527,7 +527,7 @@
       </div>
 
       <div style="margin-top: 24px;">
-        <a href="index.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
+        <a href="../index.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
           進入完整分析工具
         </a>
       </div>
@@ -716,7 +716,7 @@
 
     // 生成 OAuth2 URL
     const clientId = 'atont0WtRpJbL_dCGF7zqQZLxZAaNmwT8yEvgYYfzCjDFg-59xmaATz4IpLt5zL6';
-    const redirectUri = `${window.location.origin}/etf-analysis/dev_beta/patreon-callback.html`;
+    const redirectUri = window.location.href.replace(/patreon_cash_flow\.html.*$/, 'patreon-callback.html');
     const scope = 'identity identity.memberships';
     const state = currentUser.uid; // 傳遞 Firebase UID
 

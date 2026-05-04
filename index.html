@@ -1598,10 +1598,10 @@
 
 <!-- ── Sticky page tab navigation ─────────────────────────────────────── -->
 <nav class="tab-nav">
-  <button class="tab-btn active" id="tab-overview" onclick="showPage('overview')">ETF 一覽</button>
-  <button class="tab-btn"        id="tab-history"  onclick="showPage('history')">主動式 ETF 異動歷史</button>
+  <button class="tab-btn active" id="tab-etf-cross-analysis" onclick="showPage('etf-cross-analysis')">ETF 一覽</button>
+  <button class="tab-btn"        id="tab-etf-holding-timeline"  onclick="showPage('etf-holding-timeline')">主動式 ETF 異動歷史</button>
   <div class="auth-area">
-    <button class="tab-btn" id="tab-notes" onclick="showPage('notes')">使用者反饋與筆記</button>
+    <button class="tab-btn" id="tab-community-insights" onclick="showPage('community-insights')">使用者反饋與筆記</button>
     <div id="authArea"></div>
   </div>
 </nav>
@@ -1631,7 +1631,7 @@
 <!-- ══════════════════════════════════════════════════════════════════════
      Page 1 — ETF 一覽
 ══════════════════════════════════════════════════════════════════════ -->
-<div id="page-overview" class="page">
+<div id="page-etf-cross-analysis" class="page">
 <div class="container">
 
   <div class="section-title">ETF一覽</div>
@@ -1704,12 +1704,12 @@
   </div>
 
 </div>
-</div><!-- end page-overview -->
+</div><!-- end page-etf-cross-analysis -->
 
 <!-- ══════════════════════════════════════════════════════════════════════
      Page 2 — 主動式 ETF 異動歷史
 ══════════════════════════════════════════════════════════════════════ -->
-<div id="page-history" class="page" style="display:none">
+<div id="page-etf-holding-timeline" class="page" style="display:none">
 <div class="history-split">
 
   <aside class="history-wall-panel">
@@ -1728,17 +1728,17 @@
   </main>
 
 </div>
-</div><!-- end page-history -->
+</div><!-- end page-etf-holding-timeline -->
 
 <!-- ══════════════════════════════════════════════════════════════════════
      Page 3 — 使用者反饋與筆記
 ══════════════════════════════════════════════════════════════════════ -->
-<div id="page-notes" class="page" style="display:none">
+<div id="page-community-insights" class="page" style="display:none">
 <div class="notes-page">
   <div class="notes-section-title">所有用戶筆記</div>
   <div class="notes-list" id="notesList"><div class="notes-empty">載入中...</div></div>
 </div>
-</div><!-- end page-notes -->
+</div><!-- end page-community-insights -->
 
 <!-- ── My Portfolio Modal ── -->
 <div id="portfolioModal" class="portfolio-modal-backdrop" style="display:none"
@@ -1801,15 +1801,18 @@ const INDUSTRY_MAP = {
 };
 
 // ── Page switching ────────────────────────────────────────────────────────
-function showPage(name) {
+function showPage(name, opts = {}) {
+  if (opts.pushState !== false && location.hash.slice(1) !== name) {
+    history.pushState(null, '', '#' + name);
+  }
   document.querySelectorAll('.page').forEach(p => { p.style.display = 'none'; });
   document.getElementById('page-' + name).style.display = '';
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  const isNotes = name === 'notes';
+  const isNotes = name === 'community-insights';
   document.getElementById('mainHeader').style.display        = isNotes ? 'none' : '';
   document.getElementById('notesInputHeader').style.display  = isNotes ? '' : 'none';
-  if (name === 'history') {
+  if (name === 'etf-holding-timeline') {
     renderHistoryWall();
     renderHistoryETFTabs();
     renderHistoryContent();
@@ -2671,6 +2674,19 @@ renderTable();
 if (HISTORY_DATA.length > 0) {
   updateHistoryDesc();
 }
+
+// ── Hash Routing ──────────────────────────────────────────────────────────
+const _VALID_PAGES = ['etf-cross-analysis', 'etf-holding-timeline', 'community-insights'];
+
+// 刷新時讀取 hash 決定初始頁面
+const _initHash = location.hash.slice(1);
+if (_VALID_PAGES.includes(_initHash)) showPage(_initHash, { pushState: false });
+
+// 瀏覽器前進/後退
+window.addEventListener('popstate', () => {
+  const hash = location.hash.slice(1);
+  showPage(_VALID_PAGES.includes(hash) ? hash : 'etf-cross-analysis', { pushState: false });
+});
 </script>
 
 <!-- ── Firebase Auth + Firestore ── -->

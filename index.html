@@ -11,6 +11,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
 <title>台灣 ETF 成分股交叉分析</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -1598,10 +1599,10 @@
 
 <!-- ── Sticky page tab navigation ─────────────────────────────────────── -->
 <nav class="tab-nav">
-  <button class="tab-btn active" id="tab-etf-cross-analysis" onclick="showPage('etf-cross-analysis')">ETF 一覽</button>
-  <button class="tab-btn"        id="tab-etf-holding-timeline"  onclick="showPage('etf-holding-timeline')">主動式 ETF 異動歷史</button>
+  <button class="tab-btn active" id="tab-etfurl" onclick="showPage('etfurl')">ETF 一覽</button>
+  <button class="tab-btn"        id="tab-timelineurl"  onclick="showPage('timelineurl')">主動式 ETF 異動歷史</button>
   <div class="auth-area">
-    <button class="tab-btn" id="tab-community-insights" onclick="showPage('community-insights')">使用者反饋與筆記</button>
+    <button class="tab-btn" id="tab-communityurl" onclick="showPage('communityurl')">使用者反饋與筆記</button>
     <div id="authArea"></div>
   </div>
 </nav>
@@ -1631,7 +1632,7 @@
 <!-- ══════════════════════════════════════════════════════════════════════
      Page 1 — ETF 一覽
 ══════════════════════════════════════════════════════════════════════ -->
-<div id="page-etf-cross-analysis" class="page">
+<div id="page-etfurl" class="page">
 <div class="container">
 
   <div class="section-title">ETF一覽</div>
@@ -1704,12 +1705,12 @@
   </div>
 
 </div>
-</div><!-- end page-etf-cross-analysis -->
+</div><!-- end page-etfurl -->
 
 <!-- ══════════════════════════════════════════════════════════════════════
      Page 2 — 主動式 ETF 異動歷史
 ══════════════════════════════════════════════════════════════════════ -->
-<div id="page-etf-holding-timeline" class="page" style="display:none">
+<div id="page-timelineurl" class="page" style="display:none">
 <div class="history-split">
 
   <aside class="history-wall-panel">
@@ -1728,17 +1729,17 @@
   </main>
 
 </div>
-</div><!-- end page-etf-holding-timeline -->
+</div><!-- end page-timelineurl -->
 
 <!-- ══════════════════════════════════════════════════════════════════════
      Page 3 — 使用者反饋與筆記
 ══════════════════════════════════════════════════════════════════════ -->
-<div id="page-community-insights" class="page" style="display:none">
+<div id="page-communityurl" class="page" style="display:none">
 <div class="notes-page">
   <div class="notes-section-title">所有用戶筆記</div>
   <div class="notes-list" id="notesList"><div class="notes-empty">載入中...</div></div>
 </div>
-</div><!-- end page-community-insights -->
+</div><!-- end page-communityurl -->
 
 <!-- ── My Portfolio Modal ── -->
 <div id="portfolioModal" class="portfolio-modal-backdrop" style="display:none"
@@ -1801,18 +1802,24 @@ const INDUSTRY_MAP = {
 };
 
 // ── Page switching ────────────────────────────────────────────────────────
+const PAGE_ROUTES = {
+  'etfurl':       '/',
+  'timelineurl':  '/timeline',
+  'communityurl': '/community',
+};
 function showPage(name, opts = {}) {
-  if (opts.pushState !== false && location.hash.slice(1) !== name) {
-    history.pushState(null, '', '#' + name);
+  if (opts.pushState !== false) {
+    const path = PAGE_ROUTES[name] || '/';
+    if (location.pathname !== path) history.pushState(null, '', path);
   }
   document.querySelectorAll('.page').forEach(p => { p.style.display = 'none'; });
   document.getElementById('page-' + name).style.display = '';
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  const isNotes = name === 'community-insights';
+  const isNotes = name === 'communityurl';
   document.getElementById('mainHeader').style.display        = isNotes ? 'none' : '';
   document.getElementById('notesInputHeader').style.display  = isNotes ? '' : 'none';
-  if (name === 'etf-holding-timeline') {
+  if (name === 'timelineurl') {
     renderHistoryWall();
     renderHistoryETFTabs();
     renderHistoryContent();
@@ -2675,27 +2682,39 @@ if (HISTORY_DATA.length > 0) {
   updateHistoryDesc();
 }
 
-// ── Hash Routing ──────────────────────────────────────────────────────────
-const _VALID_PAGES = ['etf-cross-analysis', 'etf-holding-timeline', 'community-insights'];
+// ── Path Routing ──────────────────────────────────────────────────────────
+const ROUTE_PAGES = {
+  '/':          'etfurl',
+  '/timeline':  'timelineurl',
+  '/community': 'communityurl',
+};
 
-// 刷新時讀取 hash 決定初始頁面
-const _initHash = location.hash.slice(1);
-if (_VALID_PAGES.includes(_initHash)) showPage(_initHash, { pushState: false });
+// 從 404.html redirect 過來的（SPA fallback）
+const _spaRedirect = sessionStorage.getItem('spa_redirect');
+if (_spaRedirect) {
+  sessionStorage.removeItem('spa_redirect');
+  const _redirectPage = ROUTE_PAGES[_spaRedirect] || 'etfurl';
+  history.replaceState(null, '', _spaRedirect);
+  showPage(_redirectPage, { pushState: false });
+} else {
+  // 直接輸入路徑或刷新
+  const _initPage = ROUTE_PAGES[location.pathname];
+  if (_initPage) showPage(_initPage, { pushState: false });
+}
 
 // 瀏覽器前進/後退
 window.addEventListener('popstate', () => {
-  const hash = location.hash.slice(1);
-  showPage(_VALID_PAGES.includes(hash) ? hash : 'etf-cross-analysis', { pushState: false });
+  showPage(ROUTE_PAGES[location.pathname] || 'etfurl', { pushState: false });
 });
 </script>
 
 <!-- ── Firebase Auth + Firestore ── -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+    from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, deleteDoc, setDoc, doc, query, orderBy, onSnapshot }
-    from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+    from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA9CJ2FF3DUhmaZxRmKrptU10CSyi9mOfQ",

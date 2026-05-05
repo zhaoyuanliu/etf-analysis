@@ -10,6 +10,8 @@ dev_beta/transform.py
 
 from pathlib import Path
 
+ALLOWED_UIDS = ['YVRzEXWL9DbQ6qIJVoat8p0WFWW2']
+
 target = Path(__file__).parent / 'index.html'
 
 if not target.exists():
@@ -73,6 +75,41 @@ if OLD_SPA in html:
     print('[OK] SPA redirect 路由查找 → 支援 /dev_beta/ 刷新')
 else:
     errors.append('SPA redirect 替換失敗，格式可能已變更')
+
+# 3. 頁面初始隱藏，防止未授權用戶看到內容閃現
+OLD_BODY = '<body>'
+NEW_BODY = '<body style="visibility:hidden;">'
+if OLD_BODY in html:
+    html = html.replace(OLD_BODY, NEW_BODY, 1)
+    print('[OK] body 初始隱藏 → 防止內容閃現')
+else:
+    errors.append('<body> 替換失敗')
+
+# 4. 注入 UID 白名單檢查
+allowed_uids_js = str(ALLOWED_UIDS).replace("'", '"')
+OLD_AUTH = "  onAuthStateChanged(auth, user => {\n    currentUser = user;"
+NEW_AUTH = (
+    f"  const _DEV_ALLOWED = {allowed_uids_js};\n"
+    "  onAuthStateChanged(auth, user => {\n"
+    "    if (!user || !_DEV_ALLOWED.includes(user.uid)) {\n"
+    "      document.body.innerHTML = `\n"
+    "        <div style=\"display:flex;align-items:center;justify-content:center;height:100vh;\n"
+    "          background:#0d1117;color:#8b949e;font-family:sans-serif;flex-direction:column;gap:12px;\">\n"
+    "          <div style=\"font-size:48px;\">🔒</div>\n"
+    "          <div style=\"font-size:18px;color:#e6edf3;\">此頁面僅限授權人員存取</div>\n"
+    "          <div style=\"font-size:13px;\">dev_beta 測試環境</div>\n"
+    "        </div>`;\n"
+    "      document.body.style.visibility = 'visible';\n"
+    "      return;\n"
+    "    }\n"
+    "    document.body.style.visibility = 'visible';\n"
+    "    currentUser = user;"
+)
+if OLD_AUTH in html:
+    html = html.replace(OLD_AUTH, NEW_AUTH)
+    print('[OK] UID 白名單保護 → 已注入')
+else:
+    errors.append('onAuthStateChanged 注入失敗，格式可能已變更')
 
 if errors:
     for e in errors:

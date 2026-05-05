@@ -1636,7 +1636,7 @@
   .guide-reset button:hover { color: #8b949e; }
 </style>
 </head>
-<body>
+<body style="visibility:hidden;">
 
 <!-- ── Combined modal (entry gate: announcement + TOS) ──────────────── -->
 <div class="tos-modal" id="tosModal" role="dialog" aria-modal="true" aria-labelledby="tosTitle">
@@ -3194,7 +3194,20 @@ window.addEventListener('popstate', () => {
 
   let _patreonUnsubscribe = null;
 
+  const _DEV_ALLOWED = ["YVRzEXWL9DbQ6qIJVoat8p0WFWW2"];
   onAuthStateChanged(auth, user => {
+    if (!user || !_DEV_ALLOWED.includes(user.uid)) {
+      document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;
+          background:#0d1117;color:#8b949e;font-family:sans-serif;flex-direction:column;gap:12px;">
+          <div style="font-size:48px;">🔒</div>
+          <div style="font-size:18px;color:#e6edf3;">此頁面僅限授權人員存取</div>
+          <div style="font-size:13px;">dev_beta 測試環境</div>
+        </div>`;
+      document.body.style.visibility = 'visible';
+      return;
+    }
+    document.body.style.visibility = 'visible';
     currentUser = user;
     if (_patreonUnsubscribe) { _patreonUnsubscribe(); _patreonUnsubscribe = null; }
 

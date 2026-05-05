@@ -1917,7 +1917,8 @@ const PAGE_ROUTES = {
 };
 function showPage(name, opts = {}) {
   if (opts.pushState !== false) {
-    const path = PAGE_ROUTES[name] || '/';
+    const _basePath = location.pathname.startsWith('/dev_beta') ? '/dev_beta' : '';
+    const path = _basePath + (PAGE_ROUTES[name] || '/');
     if (location.pathname !== path) history.pushState(null, '', path);
   }
   document.querySelectorAll('.page').forEach(p => { p.style.display = 'none'; });
@@ -2798,10 +2799,9 @@ const ROUTE_PAGES = {
 };
 
 // 從 404.html redirect 過來的（SPA fallback）
-const _spaRedirect = sessionStorage.getItem('spa_redirect');
+const _spaRedirect = sessionStorage.getItem('dev_beta_spa_redirect');
 if (_spaRedirect) {
-  sessionStorage.removeItem('spa_redirect');
-  // 移除路徑前綴（如 /dev_beta），取得實際路由
+  sessionStorage.removeItem('dev_beta_spa_redirect');
   const _routePath = _spaRedirect.replace(/^\/dev_beta/, '') || '/';
   const _redirectPage = ROUTE_PAGES[_routePath] || 'etfurl';
   history.replaceState(null, '', _spaRedirect);

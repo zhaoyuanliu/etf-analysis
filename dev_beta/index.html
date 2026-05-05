@@ -3210,6 +3210,7 @@ window.addEventListener('popstate', () => {
     }
     // 第二層：密碼驗證（Firestore）
     if (sessionStorage.getItem('_devAccessGranted') !== 'true') {
+      document.body.style.visibility = 'visible';
       document.getElementById('_devPasswordOverlay').style.display = 'flex';
       const _inputEl  = document.getElementById('_devPasswordInput');
       const _submitEl = document.getElementById('_devPasswordSubmit');

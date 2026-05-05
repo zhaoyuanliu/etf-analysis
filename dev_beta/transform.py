@@ -105,6 +105,7 @@ NEW_AUTH = (
     "    }\n"
     "    // 第二層：密碼驗證（Firestore）\n"
     "    if (sessionStorage.getItem('_devAccessGranted') !== 'true') {\n"
+    "      document.body.style.visibility = 'visible';\n"
     "      document.getElementById('_devPasswordOverlay').style.display = 'flex';\n"
     "      const _inputEl  = document.getElementById('_devPasswordInput');\n"
     "      const _submitEl = document.getElementById('_devPasswordSubmit');\n"

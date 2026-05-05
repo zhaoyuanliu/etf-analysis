@@ -1542,101 +1542,9 @@
   .tos-ann-body b { color: var(--accent); }
   .tos-ann-body p { margin-bottom: 4px; }
   .tos-ann-body .ann-sub { color: var(--text3); font-size: 12px; margin-top: 8px; }
-
-  /* ── Patreon Modal ─────────────────────────────────────────────────────── */
-  .patreon-modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 9999;
-    display: flex; align-items: center; justify-content: flex-end;
-    backdrop-filter: blur(2.8px);
-  }
-  .patreon-modal-box {
-    position: relative; width: min(92vw, 560px); background: transparent;
-    border-radius: 16px; border: none; overflow: visible;
-    box-shadow: none; margin-right: 32px;
-    animation: patreonSlideIn 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-  .guide-tier-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
-  }
-  .guide-tier-card {
-    background: rgba(22, 27, 34, 0.95); border: 1px solid #30363d; border-radius: 10px;
-    padding: 20px 16px; text-align: center; position: relative;
-    display: flex; flex-direction: column; align-items: center;
-    box-shadow: -8px 0 40px rgba(0,0,0,0.5), 0 24px 80px rgba(0,0,0,0.7);
-  }
-  .guide-tier-card.guide-tier-highlight { border-color: #d29922; background: rgba(210,153,34,0.05); }
-  .guide-tier-badge {
-    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-    background: #d29922; color: #0d1117; font-size: 10px; font-weight: 700;
-    padding: 2px 10px; border-radius: 10px; white-space: nowrap;
-  }
-  .guide-tier-name { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 8px; }
-  .guide-tier-price { font-size: 28px; font-weight: 700; color: #58a6ff; margin-bottom: 16px; line-height: 1; }
-  .guide-tier-price span { font-size: 13px; color: #8b949e; font-weight: 400; }
-  .guide-tier-features {
-    list-style: none; padding: 0; margin: 0 0 16px 0;
-    text-align: left; font-size: 13px; color: #c9d1d9; flex: 1; width: 100%;
-  }
-  .guide-tier-features li { padding: 4px 0; }
-  .guide-tier-features li::before { content: "✓ "; color: #58a6ff; margin-right: 6px; font-weight: 600; }
-  .guide-tier-btn { width: 100%; text-align: center; }
-  .guide-already {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding-top: 16px; border-top: 1px solid #21262d; font-size: 12px; color: #6e7681;
-  }
-  .guide-already-btn {
-    background: none; border: none; color: #58a6ff;
-    font-size: 12px; cursor: pointer; padding: 0; font-family: inherit;
-  }
-  .guide-already-btn:hover { text-decoration: underline; }
-  @keyframes patreonSlideIn {
-    from { opacity: 0; transform: translateX(56px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-  .patreon-modal-close {
-    position: absolute; top: 14px; right: 16px; z-index: 10;
-    background: rgba(30,36,43,0.95); border: 1px solid #30363d; color: #e6edf3;
-    width: 32px; height: 32px; border-radius: 50%; font-size: 14px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s, border-color 0.15s;
-  }
-  .patreon-modal-close:hover { background: #f85149; border-color: #f85149; }
-  .guide-view { padding: 28px 24px 24px; }
-  .guide-title { font-size: 18px; font-weight: 700; color: #e6edf3; margin-bottom: 24px; padding-right: 36px; }
-  .guide-steps { display: flex; flex-direction: column; gap: 12px; }
-  .guide-step {
-    display: flex; gap: 14px; align-items: flex-start;
-    padding: 16px; border-radius: 10px; border: 1px solid transparent;
-  }
-  .guide-step-active  { background: rgba(88,166,255,0.06); border-color: rgba(88,166,255,0.25); }
-  .guide-step-dimmed  { background: rgba(255,255,255,0.02); border-color: #21262d; opacity: 0.45; }
-  .guide-step-done    { background: rgba(63,185,80,0.06); border-color: rgba(63,185,80,0.25); }
-  .guide-step-icon {
-    width: 30px; height: 30px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
-  }
-  .guide-step-active .guide-step-icon { background: #58a6ff; color: #0d1117; }
-  .guide-step-dimmed .guide-step-icon { background: #21262d; color: #6e7681; border: 1px solid #30363d; }
-  .guide-step-done   .guide-step-icon { background: #3fb950; color: #0d1117; }
-  .guide-step-body { flex: 1; }
-  .guide-step-title { font-size: 15px; font-weight: 600; color: #e6edf3; margin-bottom: 3px; }
-  .guide-step-desc  { font-size: 12px; color: #8b949e; margin-bottom: 12px; }
-  .guide-step-btn {
-    display: inline-block; padding: 9px 18px; background: #58a6ff; color: #0d1117;
-    border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
-    text-decoration: none; transition: all 0.2s; font-family: inherit;
-  }
-  .guide-step-btn:hover { background: #4a9eff; transform: translateY(-1px); }
-  .guide-reset { margin-top: 16px; text-align: center; }
-  .guide-reset button {
-    background: none; border: none; color: #6e7681;
-    font-size: 12px; cursor: pointer; padding: 6px 8px; font-family: inherit;
-  }
-  .guide-reset button:hover { color: #8b949e; }
 </style>
 </head>
-<body style="visibility:hidden;">
+<body>
 
 <!-- ── Combined modal (entry gate: announcement + TOS) ──────────────── -->
 <div class="tos-modal" id="tosModal" role="dialog" aria-modal="true" aria-labelledby="tosTitle">
@@ -1651,7 +1559,9 @@
       <button class="tos-tab-btn" data-tos-tab="tos-privacy">隱私權政策</button>
     </div>
     <div class="tos-body" id="tosBody">
-      <section id="tos-ann"><div class="tos-ann-icon">🧮</div><div class="tos-ann-title">平台說明</div><div class="tos-ann-body"><p>為了給您更精準的<b>視覺化分析</b>，我們每日收錄公開數據後，需經人工與系統多次驗證，並於 <b>21:00 統一更新</b>，遇資料異常時將暫沿用前期數據。<b>本站數據僅供參考，請以官方最新公告為準</b>。</p></div></section>
+      <section id="tos-ann"><div class="tos-ann-icon">🧮</div><div class="tos-ann-title">平台說明</div><div class="tos-ann-body"><p><span style="color: #C41E3A;">修復 Bug ：我的持股無法儲存</span></p>
+<p>-</p>
+<p>為了給您更精準的<b>視覺化分析</b>，我們每日收錄公開數據後，需經人工與系統多次驗證，並於 <b>21:00 統一更新</b>，遇資料異常時將暫沿用前期數據。<b>本站數據僅供參考，請以官方最新公告為準</b>。</p></div></section>
       <section id="tos-terms">
   <h3>使用條款</h3>
   <p>本網站所提供之 ETF 交叉分析數據（含成分股、張數異動等），為公開資訊彙整，可能存在延遲或誤差，僅供技術研究與資訊分享之用，不構成投資建議，實際數據請以官方公告為準。</p>
@@ -1810,18 +1720,6 @@
 <div class="history-split">
 
   <aside class="history-wall-panel">
-    <button id="patreonUpgradeBtn" onclick="openPatreonModal()" style="
-      display:block; width:100%; margin-bottom:12px; padding:8px 14px;
-      background:linear-gradient(135deg,#d29922,#e3b341);
-      color:#0d1117; border:none; border-radius:8px; font-size:13px; font-weight:700;
-      text-align:center; letter-spacing:0.3px; cursor:pointer; font-family:inherit;
-    ">⭐ 升級會員方案</button>
-    <button id="patreonOAuthBtn" onclick="openPatreonOAuthFlow()" style="
-      display:block; width:100%; margin-bottom:12px; padding:8px 14px;
-      background:linear-gradient(135deg,#ee5a24,#ff6348);
-      color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:600;
-      text-align:center; letter-spacing:0.3px; cursor:pointer; font-family:inherit;
-    ">🔐 Patreon 帳號驗證</button>
     <div class="section-title">動態牆</div>
     <div id="historyWall"></div>
   </aside>
@@ -1870,7 +1768,7 @@
     </div>
     <div class="portfolio-modal-footer">
       <button class="portfolio-btn-cancel" onclick="closePortfolioModal()">取消</button>
-      <button class="portfolio-btn-save" onclick="savePortfolioModal()">儲存持股</button>
+      <button class="portfolio-btn-save" id="btnSavePortfolio" onclick="handleSavePortfolio()">儲存持股</button>
     </div>
   </div>
 </div>
@@ -1917,8 +1815,7 @@ const PAGE_ROUTES = {
 };
 function showPage(name, opts = {}) {
   if (opts.pushState !== false) {
-    const _basePath = location.pathname.startsWith('/dev_beta') ? '/dev_beta' : '';
-    const path = _basePath + (PAGE_ROUTES[name] || '/');
+    const path = PAGE_ROUTES[name] || '/';
     if (location.pathname !== path) history.pushState(null, '', path);
   }
   document.querySelectorAll('.page').forEach(p => { p.style.display = 'none'; });
@@ -2660,15 +2557,36 @@ function closePortfolioModal() {
   document.getElementById('portfolioModal').style.display = 'none';
 }
 
-function savePortfolioModal() {
-  myPortfolio = new Set(_tempPortfolio);
-  savePortfolio();
-  if (activeFilters.has('MY_PORTFOLIO') && myPortfolio.size === 0) activeFilters.delete('MY_PORTFOLIO');
-  closePortfolioModal();
-  renderETFCards();
-  restoreCardActiveStates();
-  renderTable();
-  renderUniqueTable();
+async function savePortfolioModal() {
+  const btn = document.getElementById('btnSavePortfolio');
+  if (btn) btn.disabled = true;
+
+  try {
+    myPortfolio = new Set(_tempPortfolio);
+    savePortfolio();
+
+    // Sync to Firestore if logged in and function is available
+    if (window._etfAuth?.user && window._firestore?.savePortfolioToFirestore) {
+      await window._firestore.savePortfolioToFirestore(window._etfAuth.user.uid);
+    }
+
+    if (activeFilters.has('MY_PORTFOLIO') && myPortfolio.size === 0) activeFilters.delete('MY_PORTFOLIO');
+    closePortfolioModal();
+    renderETFCards();
+    restoreCardActiveStates();
+    renderTable();
+    renderUniqueTable();
+  } catch(err) {
+    console.error('Save error:', err);
+    alert('儲存失敗，請檢查瀏覽器控制台');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// Handler for onclick (sync wrapper for async function)
+function handleSavePortfolio() {
+  savePortfolioModal().catch(err => console.error('Save failed:', err));
 }
 
 function renderModalChips() {
@@ -2799,17 +2717,15 @@ const ROUTE_PAGES = {
 };
 
 // 從 404.html redirect 過來的（SPA fallback）
-const _spaRedirect = sessionStorage.getItem('dev_beta_spa_redirect');
+const _spaRedirect = sessionStorage.getItem('spa_redirect');
 if (_spaRedirect) {
-  sessionStorage.removeItem('dev_beta_spa_redirect');
-  const _routePath = _spaRedirect.replace(/^\/dev_beta/, '') || '/';
-  const _redirectPage = ROUTE_PAGES[_routePath] || 'etfurl';
+  sessionStorage.removeItem('spa_redirect');
+  const _redirectPage = ROUTE_PAGES[_spaRedirect] || 'etfurl';
   history.replaceState(null, '', _spaRedirect);
   showPage(_redirectPage, { pushState: false });
 } else {
   // 直接輸入路徑或刷新
-  const _initPath = location.pathname.replace(/^\/dev_beta/, '') || '/';
-  const _initPage = ROUTE_PAGES[_initPath];
+  const _initPage = ROUTE_PAGES[location.pathname];
   if (_initPage) showPage(_initPage, { pushState: false });
 }
 
@@ -2819,37 +2735,13 @@ window.addEventListener('popstate', () => {
 });
 </script>
 
-<!-- ── Patreon OAuth 配置 ── -->
-<script>
-  // 根據部署環境計算 Patreon redirect URI 基路徑
-  window.getPatreonRedirectUri = function() {
-    const origin = window.location.origin;
-    const pathname = window.location.pathname;
-
-    // 推斷基路徑：根據 pathname 判斷 index.html 所在位置
-    let basePath = '/';
-
-    // 如果路徑包含 /etfdev/，則 index.html 在 /etfdev/
-    if (pathname.includes('/etfdev/')) {
-      basePath = '/etfdev/';
-    }
-    // 如果路徑包含 /etf-analysis/，則 index.html 在 /etf-analysis/
-    else if (pathname.includes('/etf-analysis/')) {
-      basePath = '/etf-analysis/';
-    }
-    // 否則假設 index.html 在根目錄（etfcross.com 的情況）
-
-    return origin + basePath + 'patreon_pages/patreon-callback.html';
-  };
-</script>
-
 <!-- ── Firebase Auth + Firestore ── -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+    from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, deleteDoc, setDoc, doc, query, orderBy, onSnapshot, getDoc }
-    from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+    from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA9CJ2FF3DUhmaZxRmKrptU10CSyi9mOfQ",
@@ -2868,6 +2760,7 @@ window.addEventListener('popstate', () => {
 
   const NOTES_COL      = collection(db, 'notes');
   const TOS_ACPT_COL   = collection(db, 'tos_acceptances');
+  const PORTFOLIO_COL  = collection(db, 'portfolios');
   const MAX_NOTES      = 15;
   const TOS_VERSION        = 'v1';
   const TOS_FORCE_REACCEPT = false;
@@ -3168,257 +3061,79 @@ window.addEventListener('popstate', () => {
 
   window.onNotesPageOpen = () => updateInputArea(currentUser);
 
-  // ── Auth state ───────────────────────────────────────────────────────────
-  async function updatePatreonBtn(user) {
-    const btn = document.getElementById('patreonUpgradeBtn');
-    if (!btn || !user) return;
+  // ── Load portfolio from Firestore for logged-in users ─────────────────────
+  async function loadUserPortfolio(uid) {
     try {
-      const snap = await getDoc(doc(db, 'patreonAccess', user.uid));
+      const docRef = doc(db, 'portfolios', uid);
+      const snap = await getDoc(docRef);
+
       if (snap.exists()) {
         const data = snap.data();
-        if (data.verified && ['founders', 'growth', 'vip'].includes(data.tier)) {
-          const tierLabels = {
-            founders: '✅ 創始會員已開通',
-            growth: '✅ 成長會員已開通',
-            vip: '⭐ VIP 會員已開通'
-          };
-          btn.textContent = tierLabels[data.tier] || tierLabels.founders;
-          btn.style.background = 'linear-gradient(135deg,#238636,#3fb950)';
-          btn.style.color = '#fff';
-          btn.style.pointerEvents = 'none';
-          btn.style.opacity = '0.85';
+        myPortfolio = new Set(data.stocks || []);
+        console.log('✓ Loaded portfolio from Firestore:', [...myPortfolio]);
+      } else {
+        // New user: check localStorage and migrate
+        const stored = localStorage.getItem(PORTFOLIO_KEY);
+        const storedData = stored ? JSON.parse(stored) : [];
+        if (storedData.length > 0) {
+          myPortfolio = new Set(storedData);
+          console.log('↗ Migrating from localStorage to Firestore:', [...myPortfolio]);
+          await setDoc(docRef, { stocks: [...myPortfolio], updatedAt: new Date() });
+        } else {
+          myPortfolio = new Set();
+          console.log('→ New user, no existing portfolio');
         }
       }
-    } catch (_) {}
+
+      // Refresh UI after loading
+      renderETFCards();
+      restoreCardActiveStates();
+      renderTable();
+      renderUniqueTable();
+    } catch(err) {
+      console.error('❌ Failed to load portfolio from Firestore:', err);
+      // Fallback to localStorage
+      myPortfolio = new Set(JSON.parse(localStorage.getItem(PORTFOLIO_KEY) || '[]'));
+    }
   }
 
-  let _patreonUnsubscribe = null;
+  // ── Save portfolio to Firestore ──────────────────────────────────────────
+  async function savePortfolioToFirestore(uid) {
+    try {
+      const docRef = doc(db, 'portfolios', uid);
+      await setDoc(docRef, {
+        stocks: [...myPortfolio],
+        updatedAt: new Date()
+      }, { merge: true });
+      console.log('✓ Saved portfolio to Firestore:', [...myPortfolio]);
+    } catch(err) {
+      console.error('❌ Failed to save portfolio to Firestore:', err);
+      throw err;
+    }
+  }
 
-  const _DEV_ALLOWED = ["YVRzEXWL9DbQ6qIJVoat8p0WFWW2"];
+  // Expose Firestore functions to global scope for other scripts
+  window._firestore = {
+    loadUserPortfolio,
+    savePortfolioToFirestore
+  };
+
+  // ── Auth state ───────────────────────────────────────────────────────────
   onAuthStateChanged(auth, user => {
-    // 第一層：UID 白名單
-    if (!user || !_DEV_ALLOWED.includes(user.uid)) {
-      document.body.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:center;height:100vh;
-          background:#0d1117;color:#8b949e;font-family:sans-serif;flex-direction:column;gap:12px;">
-          <div style="font-size:48px;">🔒</div>
-          <div style="font-size:18px;color:#e6edf3;">此頁面僅限授權人員存取</div>
-          <div style="font-size:13px;">dev_beta 測試環境</div>
-        </div>`;
-      document.body.style.visibility = 'visible';
-      return;
-    }
-    // 第二層：密碼驗證（Firestore）
-    if (sessionStorage.getItem('_devAccessGranted') !== 'true') {
-      document.body.style.visibility = 'visible';
-      document.getElementById('_devPasswordOverlay').style.display = 'flex';
-      const _inputEl  = document.getElementById('_devPasswordInput');
-      const _submitEl = document.getElementById('_devPasswordSubmit');
-      const _errEl    = document.getElementById('_devPasswordErr');
-      const _doVerify = async () => {
-        const _input = _inputEl.value.trim();
-        _errEl.textContent = '';
-        _submitEl.disabled = true;
-        _submitEl.textContent = '驗證中...';
-        try {
-          const _snap = await getDoc(doc(db, 'dev_config', 'access_code'));
-          if (_input === String(_snap.data()?.code)) {
-            sessionStorage.setItem('_devAccessGranted', 'true');
-            location.reload();
-          } else {
-            _errEl.textContent = '密碼錯誤，請再試一次';
-            _inputEl.value = '';
-            _inputEl.focus();
-            _submitEl.disabled = false;
-            _submitEl.textContent = '驗證';
-          }
-        } catch(e) {
-          _errEl.textContent = '驗證失敗，請重試';
-          _submitEl.disabled = false;
-          _submitEl.textContent = '驗證';
-        }
-      };
-      _submitEl.onclick = _doVerify;
-      _inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') _doVerify(); });
-      _inputEl.focus();
-      return;
-    }
-    document.body.style.visibility = 'visible';
     currentUser = user;
-    if (_patreonUnsubscribe) { _patreonUnsubscribe(); _patreonUnsubscribe = null; }
-
     if (user) {
       renderLoggedIn(user);
-
-      _patreonUnsubscribe = onSnapshot(doc(db, 'patreonAccess', user.uid), (snap) => {
-        const data = snap.exists() ? snap.data() : null;
-        const btn = document.getElementById('patreonUpgradeBtn');
-        if (btn) {
-          if (data?.verified && ['founders', 'growth', 'vip'].includes(data.tier)) {
-            const labels = {
-              founders: '✅ 創始會員已開通',
-              growth:   '✅ 成長會員已開通',
-              vip:      '⭐ VIP 會員已開通',
-            };
-            btn.textContent = labels[data.tier] || '✅ 會員已開通';
-            btn.style.background = 'linear-gradient(135deg,#238636,#3fb950)';
-            btn.style.color = '#fff';
-            btn.style.pointerEvents = 'none';
-            btn.style.opacity = '0.85';
-            const modal = document.getElementById('patreonModal');
-            if (modal && modal.style.display === 'flex') {
-              modal.style.display = 'none';
-              document.body.style.overflow = '';
-            }
-          } else if (btn.style.pointerEvents === 'none') {
-            btn.textContent = '⭐ 升級會員方案';
-            btn.style.background = 'linear-gradient(135deg,#d29922,#e3b341)';
-            btn.style.color = '#0d1117';
-            btn.style.pointerEvents = '';
-            btn.style.opacity = '';
-          }
-        }
-      });
-    } else {
+      loadUserPortfolio(user.uid);
+    }
+    else      {
       renderLoggedOut();
     }
-
     updateInputArea(user);
     openCombinedModal(user);
     if (typeof window.onAuthChanged === 'function') window.onAuthChanged();
-    updatePatreonBtn(user);
   });
 
   initCombinedModal();
-
-  // ── Patreon Modal （簡化版：只有方案選擇，webhook 自動解鎖）────────────
-
-  window.openPatreonModal = function() {
-    document.getElementById('patreonModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-  };
-
-  window.closePatreonModal = function(event) {
-    if (event && event.target !== document.getElementById('patreonModal')) return;
-    document.getElementById('patreonModal').style.display = 'none';
-    document.body.style.overflow = '';
-  };
-
-  window.closePatreonModalBtn = function() {
-    document.getElementById('patreonModal').style.display = 'none';
-    document.body.style.overflow = '';
-  };
-
-  window.onPatreonSubscribeClick = function() {
-    document.getElementById('patreonModal').style.display = 'none';
-    document.body.style.overflow = '';
-  };
-
-  window.openPatreonOAuthFlow = function() {
-    const btn = document.getElementById('patreonOAuthBtn');
-    if (!currentUser) {
-      alert('請先登入 Google 帳號');
-      return;
-    }
-
-    btn.textContent = '驗證中...';
-    btn.disabled = true;
-
-    const clientId = 'atont0WtRpJbL_dCGF7zqQZLxZAaNmwT8yEvgYYfzCjDFg-59xmaATz4IpLt5zL6';
-    const scope = 'identity identity.memberships';
-
-    // 計算 redirect URI - 指向 patreon-callback.html
-    const redirectUri = window.getPatreonRedirectUri();
-
-    const state = currentUser.uid;
-    const oauthUrl = `https://www.patreon.com/oauth2/authorize?` +
-      `response_type=code&` +
-      `client_id=${encodeURIComponent(clientId)}&` +
-      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-      `scope=${encodeURIComponent(scope)}&` +
-      `state=${encodeURIComponent(state)}`;
-
-    const popup = window.open(oauthUrl, 'PatreonAuth', 'width=600,height=800');
-    if (!popup) {
-      alert('請允許瀏覽器彈出式視窗');
-      btn.textContent = '🔐 Patreon 帳號驗證';
-      btn.disabled = false;
-      return;
-    }
-
-    // 監聽來自 callback 的訊息
-    const handleMessage = (event) => {
-      if (event.origin !== window.location.origin) return;
-      if (event.data.type === 'patreon_verified') {
-        btn.textContent = '✓ 已驗證';
-        btn.style.background = '#238636';
-        window.removeEventListener('message', handleMessage);
-      } else if (event.data.type === 'patreon_error') {
-        alert('Patreon 驗證失敗：' + (event.data.error || '未知錯誤'));
-        btn.textContent = '🔐 Patreon 帳號驗證';
-        btn.disabled = false;
-        window.removeEventListener('message', handleMessage);
-      }
-    };
-    window.addEventListener('message', handleMessage);
-  };
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      const modal = document.getElementById('patreonModal');
-      if (modal && modal.style.display === 'flex') {
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
-      }
-    }
-  });
 </script>
-
-<!-- Patreon 訂閱方案 Modal -->
-<div id="patreonModal" class="patreon-modal-backdrop" style="display:none;" onclick="closePatreonModal(event)">
-  <div class="patreon-modal-box">
-    <button class="patreon-modal-close" onclick="closePatreonModalBtn()" title="關閉">✕</button>
-
-    <div class="guide-view">
-      <div class="guide-title">選擇訂閱方案</div>
-      <div class="guide-tier-grid">
-        <div class="guide-tier-card">
-              
-              <div class="guide-tier-name">創始會員-元老</div>
-              <div class="guide-tier-price">$9<span>/月</span></div>
-              <ul class="guide-tier-features"><li>完整 ETF 成分股交叉分析</li><li>每週市場信號分析報告</li><li>實時數據更新</li><li>3 枚 Golden Tickets（邀請好友）</li><li>創始會員永久優惠</li></ul>
-              <a href="https://www.patreon.com/join/RyanLiu/checkout?rid=28498975"
-                 target="_blank" rel="noopener"
-                 class="guide-step-btn guide-tier-btn" onclick="onPatreonSubscribeClick()">
-                前往訂閱 →
-              </a>
-            </div>
-      </div>
-      <div style="text-align:center; font-size:12px; color:#8b949e; margin-top:16px;">
-        訂閱完成後，我們會自動為您解鎖內容
-      </div>
-    </div>
-
-  </div>
-</div>
-
-
-<div id="_devPasswordOverlay" style="display:none;position:fixed;inset:0;background:#0d1117;
-  z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:16px;
-  font-family:'Noto Sans TC',sans-serif;">
-  <div style="font-size:40px;">🔑</div>
-  <div style="color:#e6edf3;font-size:18px;font-weight:600;">dev_beta 存取驗證</div>
-  <div style="color:#8b949e;font-size:13px;">請輸入存取碼</div>
-  <input id="_devPasswordInput" type="password" placeholder="存取碼"
-    style="background:#161b22;border:1px solid #30363d;border-radius:8px;color:#e6edf3;
-      font-size:18px;padding:12px 20px;outline:none;width:220px;text-align:center;
-      letter-spacing:6px;margin-top:4px;">
-  <button id="_devPasswordSubmit"
-    style="background:#58a6ff;border:none;border-radius:8px;color:#0d1117;font-size:14px;
-      font-weight:600;padding:10px 32px;cursor:pointer;font-family:inherit;">
-    驗證
-  </button>
-  <div id="_devPasswordErr" style="color:#f85149;font-size:13px;min-height:18px;"></div>
-</div>
 </body>
 </html>

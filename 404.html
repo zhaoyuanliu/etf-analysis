@@ -3,8 +3,12 @@
 <head><meta charset="UTF-8"></head>
 <body>
 <script>
-  sessionStorage.setItem('spa_redirect', window.location.pathname);
-  window.location.replace('/');
+  // 智能判斷應該重定向到哪個版本
+  const pathname = window.location.pathname;
+  const redirectTarget = pathname.includes('/dev_beta/') ? '/dev_beta/' : '/';
+
+  sessionStorage.setItem('spa_redirect', pathname);
+  window.location.replace(redirectTarget);
 </script>
 </body>
 </html>

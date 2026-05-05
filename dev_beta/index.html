@@ -3196,6 +3196,7 @@ window.addEventListener('popstate', () => {
 
   const _DEV_ALLOWED = ["YVRzEXWL9DbQ6qIJVoat8p0WFWW2"];
   onAuthStateChanged(auth, user => {
+    // 第一層：UID 白名單
     if (!user || !_DEV_ALLOWED.includes(user.uid)) {
       document.body.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:center;height:100vh;
@@ -3205,6 +3206,40 @@ window.addEventListener('popstate', () => {
           <div style="font-size:13px;">dev_beta 測試環境</div>
         </div>`;
       document.body.style.visibility = 'visible';
+      return;
+    }
+    // 第二層：密碼驗證（Firestore）
+    if (sessionStorage.getItem('_devAccessGranted') !== 'true') {
+      document.getElementById('_devPasswordOverlay').style.display = 'flex';
+      const _inputEl  = document.getElementById('_devPasswordInput');
+      const _submitEl = document.getElementById('_devPasswordSubmit');
+      const _errEl    = document.getElementById('_devPasswordErr');
+      const _doVerify = async () => {
+        const _input = _inputEl.value.trim();
+        _errEl.textContent = '';
+        _submitEl.disabled = true;
+        _submitEl.textContent = '驗證中...';
+        try {
+          const _snap = await getDoc(doc(db, 'dev_config', 'access_code'));
+          if (_input === String(_snap.data()?.code)) {
+            sessionStorage.setItem('_devAccessGranted', 'true');
+            location.reload();
+          } else {
+            _errEl.textContent = '密碼錯誤，請再試一次';
+            _inputEl.value = '';
+            _inputEl.focus();
+            _submitEl.disabled = false;
+            _submitEl.textContent = '驗證';
+          }
+        } catch(e) {
+          _errEl.textContent = '驗證失敗，請重試';
+          _submitEl.disabled = false;
+          _submitEl.textContent = '驗證';
+        }
+      };
+      _submitEl.onclick = _doVerify;
+      _inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') _doVerify(); });
+      _inputEl.focus();
       return;
     }
     document.body.style.visibility = 'visible';
@@ -3366,5 +3401,23 @@ window.addEventListener('popstate', () => {
   </div>
 </div>
 
+
+<div id="_devPasswordOverlay" style="display:none;position:fixed;inset:0;background:#0d1117;
+  z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:16px;
+  font-family:'Noto Sans TC',sans-serif;">
+  <div style="font-size:40px;">🔑</div>
+  <div style="color:#e6edf3;font-size:18px;font-weight:600;">dev_beta 存取驗證</div>
+  <div style="color:#8b949e;font-size:13px;">請輸入存取碼</div>
+  <input id="_devPasswordInput" type="password" placeholder="存取碼"
+    style="background:#161b22;border:1px solid #30363d;border-radius:8px;color:#e6edf3;
+      font-size:18px;padding:12px 20px;outline:none;width:220px;text-align:center;
+      letter-spacing:6px;margin-top:4px;">
+  <button id="_devPasswordSubmit"
+    style="background:#58a6ff;border:none;border-radius:8px;color:#0d1117;font-size:14px;
+      font-weight:600;padding:10px 32px;cursor:pointer;font-family:inherit;">
+    驗證
+  </button>
+  <div id="_devPasswordErr" style="color:#f85149;font-size:13px;min-height:18px;"></div>
+</div>
 </body>
 </html>

@@ -1559,7 +1559,9 @@
       <button class="tos-tab-btn" data-tos-tab="tos-privacy">隱私權政策</button>
     </div>
     <div class="tos-body" id="tosBody">
-      <section id="tos-ann"><div class="tos-ann-icon">🧮</div><div class="tos-ann-title">平台說明</div><div class="tos-ann-body"><p>為了給您更精準的<b>視覺化分析</b>，我們每日收錄公開數據後，需經人工與系統多次驗證，並於 <b>21:00 統一更新</b>，遇資料異常時將暫沿用前期數據。<b>本站數據僅供參考，請以官方最新公告為準</b>。</p></div></section>
+      <section id="tos-ann"><div class="tos-ann-icon">🧮</div><div class="tos-ann-title">平台說明</div><div class="tos-ann-body"><p><span style="color: #C41E3A;">修復 Bug ：我的持股無法儲存</span></p>
+<p>-</p>
+<p>為了給您更精準的<b>視覺化分析</b>，我們每日收錄公開數據後，需經人工與系統多次驗證，並於 <b>21:00 統一更新</b>，遇資料異常時將暫沿用前期數據。<b>本站數據僅供參考，請以官方最新公告為準</b>。</p></div></section>
       <section id="tos-terms">
   <h3>使用條款</h3>
   <p>本網站所提供之 ETF 交叉分析數據（含成分股、張數異動等），為公開資訊彙整，可能存在延遲或誤差，僅供技術研究與資訊分享之用，不構成投資建議，實際數據請以官方公告為準。</p>
@@ -1766,7 +1768,7 @@
     </div>
     <div class="portfolio-modal-footer">
       <button class="portfolio-btn-cancel" onclick="closePortfolioModal()">取消</button>
-      <button class="portfolio-btn-save" onclick="savePortfolioModal()">儲存持股</button>
+      <button class="portfolio-btn-save" id="btnSavePortfolio" onclick="handleSavePortfolio()">儲存持股</button>
     </div>
   </div>
 </div>
@@ -2555,15 +2557,36 @@ function closePortfolioModal() {
   document.getElementById('portfolioModal').style.display = 'none';
 }
 
-function savePortfolioModal() {
-  myPortfolio = new Set(_tempPortfolio);
-  savePortfolio();
-  if (activeFilters.has('MY_PORTFOLIO') && myPortfolio.size === 0) activeFilters.delete('MY_PORTFOLIO');
-  closePortfolioModal();
-  renderETFCards();
-  restoreCardActiveStates();
-  renderTable();
-  renderUniqueTable();
+async function savePortfolioModal() {
+  const btn = document.getElementById('btnSavePortfolio');
+  if (btn) btn.disabled = true;
+
+  try {
+    myPortfolio = new Set(_tempPortfolio);
+    savePortfolio();
+
+    // Sync to Firestore if logged in and function is available
+    if (window._etfAuth?.user && window._firestore?.savePortfolioToFirestore) {
+      await window._firestore.savePortfolioToFirestore(window._etfAuth.user.uid);
+    }
+
+    if (activeFilters.has('MY_PORTFOLIO') && myPortfolio.size === 0) activeFilters.delete('MY_PORTFOLIO');
+    closePortfolioModal();
+    renderETFCards();
+    restoreCardActiveStates();
+    renderTable();
+    renderUniqueTable();
+  } catch(err) {
+    console.error('Save error:', err);
+    alert('儲存失敗，請檢查瀏覽器控制台');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// Handler for onclick (sync wrapper for async function)
+function handleSavePortfolio() {
+  savePortfolioModal().catch(err => console.error('Save failed:', err));
 }
 
 function renderModalChips() {
@@ -2717,7 +2740,7 @@ window.addEventListener('popstate', () => {
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, deleteDoc, setDoc, doc, query, orderBy, onSnapshot }
+  import { getFirestore, collection, addDoc, deleteDoc, setDoc, doc, query, orderBy, onSnapshot, getDoc }
     from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -2737,6 +2760,7 @@ window.addEventListener('popstate', () => {
 
   const NOTES_COL      = collection(db, 'notes');
   const TOS_ACPT_COL   = collection(db, 'tos_acceptances');
+  const PORTFOLIO_COL  = collection(db, 'portfolios');
   const MAX_NOTES      = 15;
   const TOS_VERSION        = 'v1';
   const TOS_FORCE_REACCEPT = false;
@@ -3037,11 +3061,73 @@ window.addEventListener('popstate', () => {
 
   window.onNotesPageOpen = () => updateInputArea(currentUser);
 
+  // ── Load portfolio from Firestore for logged-in users ─────────────────────
+  async function loadUserPortfolio(uid) {
+    try {
+      const docRef = doc(db, 'portfolios', uid);
+      const snap = await getDoc(docRef);
+
+      if (snap.exists()) {
+        const data = snap.data();
+        myPortfolio = new Set(data.stocks || []);
+        console.log('✓ Loaded portfolio from Firestore:', [...myPortfolio]);
+      } else {
+        // New user: check localStorage and migrate
+        const stored = localStorage.getItem(PORTFOLIO_KEY);
+        const storedData = stored ? JSON.parse(stored) : [];
+        if (storedData.length > 0) {
+          myPortfolio = new Set(storedData);
+          console.log('↗ Migrating from localStorage to Firestore:', [...myPortfolio]);
+          await setDoc(docRef, { stocks: [...myPortfolio], updatedAt: new Date() });
+        } else {
+          myPortfolio = new Set();
+          console.log('→ New user, no existing portfolio');
+        }
+      }
+
+      // Refresh UI after loading
+      renderETFCards();
+      restoreCardActiveStates();
+      renderTable();
+      renderUniqueTable();
+    } catch(err) {
+      console.error('❌ Failed to load portfolio from Firestore:', err);
+      // Fallback to localStorage
+      myPortfolio = new Set(JSON.parse(localStorage.getItem(PORTFOLIO_KEY) || '[]'));
+    }
+  }
+
+  // ── Save portfolio to Firestore ──────────────────────────────────────────
+  async function savePortfolioToFirestore(uid) {
+    try {
+      const docRef = doc(db, 'portfolios', uid);
+      await setDoc(docRef, {
+        stocks: [...myPortfolio],
+        updatedAt: new Date()
+      }, { merge: true });
+      console.log('✓ Saved portfolio to Firestore:', [...myPortfolio]);
+    } catch(err) {
+      console.error('❌ Failed to save portfolio to Firestore:', err);
+      throw err;
+    }
+  }
+
+  // Expose Firestore functions to global scope for other scripts
+  window._firestore = {
+    loadUserPortfolio,
+    savePortfolioToFirestore
+  };
+
   // ── Auth state ───────────────────────────────────────────────────────────
   onAuthStateChanged(auth, user => {
     currentUser = user;
-    if (user) { renderLoggedIn(user); }
-    else      { renderLoggedOut(); }
+    if (user) {
+      renderLoggedIn(user);
+      loadUserPortfolio(user.uid);
+    }
+    else      {
+      renderLoggedOut();
+    }
     updateInputArea(user);
     openCombinedModal(user);
     if (typeof window.onAuthChanged === 'function') window.onAuthChanged();

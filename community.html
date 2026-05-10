@@ -12,18 +12,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
-<link rel="canonical" href="https://etfcross.com/" />
+<link rel="canonical" href="https://etfcross.com/community" />
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="favicon.png">
-<title>ETF 交叉持股分析｜找出聰明錢布局與資金流向 | ETF Cross</title>
-<meta name="description" content="ETF Cross 是台灣 ETF 交叉持股分析工具，支援主動式與被動式 ETF 比對，快速分析 0050、00981A 等熱門標的的重疊持股與資金流向，洞察聰明錢布局，找出市場共識與潛在風險，做出更聰明的投資決策。">
-<meta property="og:title" content="ETF 交叉持股分析｜找出聰明錢布局與資金流向 | ETF Cross">
-<meta property="og:description" content="ETF Cross 是台灣 ETF 交叉持股分析工具，支援主動式與被動式 ETF 比對，快速分析 0050、00981A 等熱門標的的重疊持股與資金流向，洞察聰明錢布局，找出市場共識與潛在風險，做出更聰明的投資決策。">
-<meta property="og:url" content="https://etfcross.com/">
+<title>使用者反饋與筆記｜ETF Cross</title>
+<meta name="description" content="ETF Cross 使用者社群留言區，分享 ETF 投資心得、卡片觀察與站務反饋。">
+<meta property="og:title" content="使用者反饋與筆記｜ETF Cross">
+<meta property="og:description" content="ETF Cross 使用者社群留言區，分享 ETF 投資心得、卡片觀察與站務反饋。">
+<meta property="og:url" content="https://etfcross.com/community">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ETF 交叉持股分析｜找出聰明錢布局與資金流向 | ETF Cross">
-<meta name="twitter:description" content="ETF Cross 是台灣 ETF 交叉持股分析工具，支援主動式與被動式 ETF 比對，快速分析 0050、00981A 等熱門標的的重疊持股與資金流向，洞察聰明錢布局，找出市場共識與潛在風險，做出更聰明的投資決策。">
+<meta name="twitter:title" content="使用者反饋與筆記｜ETF Cross">
+<meta name="twitter:description" content="ETF Cross 使用者社群留言區，分享 ETF 投資心得、卡片觀察與站務反饋。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -1654,22 +1654,22 @@
 
 <!-- ── Sticky page tab navigation ─────────────────────────────────────── -->
 <nav class="tab-nav">
-  <a class="tab-btn active" href="./">ETF 一覽</a>
+  <a class="tab-btn " href="./">ETF 一覽</a>
   <a class="tab-btn " href="timeline">主動式 ETF 異動歷史</a>
   <div class="auth-area">
-    <a class="tab-btn " href="community">使用者反饋與筆記</a>
+    <a class="tab-btn active" href="community">使用者反饋與筆記</a>
     <div id="authArea"></div>
   </div>
 </nav>
 
 <!-- ── Shared header ──────────────────────────────────────────────────── -->
-<div class="header" id="mainHeader">
+<div class="header" id="mainHeader" style="display:none">
   <h1>台灣 <span> ETF </span> 成分股交叉分析</h1>
   <p class="header-sub">你的持股 + 主動式 + 被動式 &nbsp;|&nbsp; 點擊卡片開始分析 &nbsp;|&nbsp; 資料日期：<b>2026/05/08</b> &nbsp;</p>
 </div>
 
 <!-- ── Notes input header (replaces main header on notes page) ── -->
-<div id="notesInputHeader" style="display:none">
+<div id="notesInputHeader">
   <div class="notes-header-inner">
     <div id="notesInputArea" class="notes-input-area">
       <textarea class="notes-textarea" id="noteTextarea" placeholder="寫下你的想法、卡片觀察或對本站的反饋..."></textarea>
@@ -1687,7 +1687,7 @@
 <!-- ══════════════════════════════════════════════════════════════════════
      Page 1 — ETF 一覽
 ══════════════════════════════════════════════════════════════════════ -->
-<div id="page-etfurl" class="page">
+<div id="page-etfurl" class="page" style="display:none">
 <div class="container">
 
   <div class="section-title">ETF一覽</div>
@@ -1789,7 +1789,7 @@
 <!-- ══════════════════════════════════════════════════════════════════════
      Page 3 — 使用者反饋與筆記
 ══════════════════════════════════════════════════════════════════════ -->
-<div id="page-communityurl" class="page" style="display:none">
+<div id="page-communityurl" class="page">
 <div class="notes-page">
   <div class="notes-section-title">所有用戶筆記</div>
   <div class="notes-list" id="notesList"><div class="notes-empty">載入中...</div></div>
@@ -2742,7 +2742,7 @@ renderTable();
 if (HISTORY_DATA.length > 0) {
   updateHistoryDesc();
 }
-
+if (typeof window.onNotesPageOpen === "function") window.onNotesPageOpen();
 </script>
 
 <!-- ── Firebase Auth + Firestore ── -->

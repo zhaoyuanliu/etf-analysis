@@ -12,18 +12,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
-<link rel="canonical" href="https://etfcross.com/" />
+<link rel="canonical" href="https://etfcross.com/timeline" />
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="favicon.png">
-<title>ETF 交叉持股分析｜找出聰明錢布局與資金流向 | ETF Cross</title>
-<meta name="description" content="ETF Cross 是台灣 ETF 交叉持股分析工具，支援主動式與被動式 ETF 比對，快速分析 0050、00981A 等熱門標的的重疊持股與資金流向，洞察聰明錢布局，找出市場共識與潛在風險，做出更聰明的投資決策。">
-<meta property="og:title" content="ETF 交叉持股分析｜找出聰明錢布局與資金流向 | ETF Cross">
-<meta property="og:description" content="ETF Cross 是台灣 ETF 交叉持股分析工具，支援主動式與被動式 ETF 比對，快速分析 0050、00981A 等熱門標的的重疊持股與資金流向，洞察聰明錢布局，找出市場共識與潛在風險，做出更聰明的投資決策。">
-<meta property="og:url" content="https://etfcross.com/">
+<title>主動式 ETF 持股異動歷史｜ETF Cross</title>
+<meta name="description" content="每日追蹤 00981A、00982A、00991A、00992A 等主動式 ETF 成分股異動，比對換股方向、加倉減倉動作，掌握主動經理人最新選股與資金流向。">
+<meta property="og:title" content="主動式 ETF 持股異動歷史｜ETF Cross">
+<meta property="og:description" content="每日追蹤 00981A、00982A、00991A、00992A 等主動式 ETF 成分股異動，比對換股方向、加倉減倉動作，掌握主動經理人最新選股與資金流向。">
+<meta property="og:url" content="https://etfcross.com/timeline">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ETF 交叉持股分析｜找出聰明錢布局與資金流向 | ETF Cross">
-<meta name="twitter:description" content="ETF Cross 是台灣 ETF 交叉持股分析工具，支援主動式與被動式 ETF 比對，快速分析 0050、00981A 等熱門標的的重疊持股與資金流向，洞察聰明錢布局，找出市場共識與潛在風險，做出更聰明的投資決策。">
+<meta name="twitter:title" content="主動式 ETF 持股異動歷史｜ETF Cross">
+<meta name="twitter:description" content="每日追蹤 00981A、00982A、00991A、00992A 等主動式 ETF 成分股異動，比對換股方向、加倉減倉動作，掌握主動經理人最新選股與資金流向。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -1654,8 +1654,8 @@
 
 <!-- ── Sticky page tab navigation ─────────────────────────────────────── -->
 <nav class="tab-nav">
-  <a class="tab-btn active" href="./">ETF 一覽</a>
-  <a class="tab-btn " href="timeline">主動式 ETF 異動歷史</a>
+  <a class="tab-btn " href="./">ETF 一覽</a>
+  <a class="tab-btn active" href="timeline">主動式 ETF 異動歷史</a>
   <div class="auth-area">
     <a class="tab-btn " href="community">使用者反饋與筆記</a>
     <div id="authArea"></div>
@@ -1687,7 +1687,7 @@
 <!-- ══════════════════════════════════════════════════════════════════════
      Page 1 — ETF 一覽
 ══════════════════════════════════════════════════════════════════════ -->
-<div id="page-etfurl" class="page">
+<div id="page-etfurl" class="page" style="display:none">
 <div class="container">
 
   <div class="section-title">ETF一覽</div>
@@ -1765,7 +1765,7 @@
 <!-- ══════════════════════════════════════════════════════════════════════
      Page 2 — 主動式 ETF 異動歷史
 ══════════════════════════════════════════════════════════════════════ -->
-<div id="page-timelineurl" class="page" style="display:none">
+<div id="page-timelineurl" class="page">
 <div class="history-split">
 
   <aside class="history-wall-panel">
@@ -2742,7 +2742,9 @@ renderTable();
 if (HISTORY_DATA.length > 0) {
   updateHistoryDesc();
 }
-
+renderHistoryWall();
+renderHistoryETFTabs();
+renderHistoryContent();
 </script>
 
 <!-- ── Firebase Auth + Firestore ── -->

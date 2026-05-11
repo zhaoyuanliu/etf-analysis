@@ -120,6 +120,25 @@
     border-bottom-color: var(--accent);
   }
 
+  @media (max-width: 640px) {
+    .tab-nav {
+      padding: 0 4px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 0;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 12px 12px;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .auth-area { flex-shrink: 0; }
+    #authArea { padding: 6px 4px 6px 2px; }
+    .user-name { max-width: 72px; }
+  }
+
   /* ── Layout ── */
   .container {
     max-width: 1400px;
@@ -162,43 +181,53 @@
     gap: 12px;
   }
 
-  /* ── Active cards — fixed portfolio + horizontal scroll ── */
-  .active-cards-wrapper {
-    position: relative;
+  /* ── Active cards — group header + grid ── */
+  .active-group-header {
     display: flex;
-    gap: 12px;
-    align-items: stretch;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
   }
-  .active-cards-fixed {
+  .active-group-header .etf-group-title {
+    margin-bottom: 0;
     flex-shrink: 0;
-    width: 200px;
   }
-  .active-cards-fixed .etf-card,
-  .active-cards-fixed .portfolio-card-empty {
-    height: 100%;
-    box-sizing: border-box;
-  }
-  .active-cards-scroll {
+  .active-group-tabs {
     display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    flex: 1;
-    min-width: 0;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-    padding-bottom: 6px;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+    border-left: 3px solid var(--border);
+    padding-left: 8px;
+    line-height: 1;
   }
-  .active-cards-scroll .etf-card {
-    flex-shrink: 0;
-    width: 200px;
+  .agt-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 10px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    white-space: nowrap;
+    line-height: 1;
   }
-  .active-scroll-fade {
-    position: absolute;
-    right: 0; top: 0; bottom: 6px;
-    width: 60px;
-    background: linear-gradient(to right, transparent, var(--bg));
-    pointer-events: none;
+  .agt-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
+  .agt-btn.active {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--bg2));
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .agt-arrow { font-size: 9px; opacity: 0.7; }
   .etf-card {
     background: var(--bg2);
     border: 1px solid var(--border);
@@ -268,21 +297,25 @@
   }
   .card-link-btn {
     position: absolute;
-    bottom: 10px; right: 12px;
+    top: 10px; right: 10px;
     display: inline-flex;
     align-items: center;
-    gap: 3px;
-    font-size: 10px;
-    color: var(--text3);
+    justify-content: center;
+    font-size: 16px;
+    color: var(--text2);
     text-decoration: none;
     border: none;
     background: transparent;
     cursor: pointer;
-    padding: 0;
-    transition: color 0.2s;
+    padding: 4px;
+    line-height: 1;
+    opacity: 0.5;
+    transform: scale(0.7);
+    transition: color 0.2s, opacity 0.2s;
   }
   .card-link-btn:hover {
     color: var(--card-color, var(--accent));
+    opacity: 1;
   }
 
   /* ── My Portfolio — empty card ── */
@@ -1870,7 +1903,7 @@ function renderETFCards() {
       <div class="card-aum">${e.aum}</div>
       <div class="card-tags">${e.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
       ${e.url ? `<a class="card-link-btn" href="${e.url}" target="_blank" rel="noopener"
-           onclick="event.stopPropagation()">🔗 查看官方公告</a>` : ''}
+           onclick="event.stopPropagation()" title="查看官方公告">🔗</a>` : ''}
     </div>`;
 
   const portfolioCardHtml = () => {
@@ -1882,15 +1915,15 @@ function renderETFCards() {
         </div>`;
     }
     const tickers = [...myPortfolio];
-    const shown   = tickers.slice(0, 4).map(c => `<span class="tag">${c}</span>`).join('');
-    const more    = tickers.length > 4 ? `<span class="tag">+${tickers.length - 4}</span>` : '';
+    const shown   = tickers.slice(0, 3).map(c => `<span class="tag">${c}</span>`).join('');
+    const more    = tickers.length > 3 ? `<span class="tag">+${tickers.length - 3}</span>` : '';
     return `
       <div class="etf-card" id="card-MY_PORTFOLIO"
            style="--card-color:#58a6ff" onclick="togglePortfolioFilter()">
         <div class="card-ticker" style="display:flex;justify-content:space-between;align-items:flex-start">
           <span>我的持股</span>
-          <button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:0;line-height:1;opacity:0.6"
-                  onclick="event.stopPropagation();openPortfolioModal()" title="編輯持股">✎</button>
+          <button style="background:none;border:none;color:var(--text);cursor:pointer;font-size:15px;padding:0;line-height:1;opacity:0.7;display:flex;align-items:center;gap:4px"
+                  onclick="event.stopPropagation();openPortfolioModal()" title="編輯持股">✎ 編輯</button>
         </div>
         <div class="card-name">${tickers.length} 檔自選股</div>
         <div class="card-aum" style="font-size:18px">${tickers.length} 檔</div>
@@ -1906,22 +1939,30 @@ function renderETFCards() {
       </div>
     </div>`;
 
-  const renderActiveGroup = (title, cards) => `
-    <div class="etf-group">
-      <div class="etf-group-title">${title}</div>
-      <div class="active-cards-wrapper">
-        <div class="active-cards-fixed">
+  const renderActiveGroup = (cards) => {
+    const sorted = [...cards].sort((a, b) => parseAum(b.aum) - parseAum(a.aum));
+    const groups = [];
+    for (let i = 0; i < sorted.length; i += 5) groups.push(sorted.slice(i, i + 5));
+    const idx = Math.min(activeGroupIdx, groups.length - 1);
+    const tabsHtml = groups.map((g, i) => {
+      const minAum = g[g.length - 1].aum.trim();
+      return `<button class="agt-btn${i === idx ? ' active' : ''}" onclick="switchActiveGroup(${i})"><span class="agt-arrow">↑</span> ${minAum}</button>`;
+    }).join('');
+    return `
+      <div class="etf-group">
+        <div class="active-group-header">
+          <div class="etf-group-title">主動式卡片</div>
+          <div class="active-group-tabs">${tabsHtml}</div>
+        </div>
+        <div class="etf-cards">
           ${portfolioCardHtml()}
+          ${groups[idx].map(etfCardHtml).join('')}
         </div>
-        <div class="active-cards-scroll">
-          ${cards.map(etfCardHtml).join('')}
-        </div>
-        <div class="active-scroll-fade"></div>
-      </div>
-    </div>`;
+      </div>`;
+  };
 
   grid.innerHTML =
-    (active.length  ? renderActiveGroup('主動式卡片', active) : '') +
+    (active.length  ? renderActiveGroup(active) : '') +
     (passive.length ? renderGroup('被動式卡片', passive) : '');
 }
 
@@ -1966,6 +2007,11 @@ function formatCapital(yi) {
 // ── Table rendering ───────────────────────────────────────────────────────
 let expandedRow = null;
 let activeFilters = new Set();
+let activeGroupIdx = 0;
+
+function parseAum(str) {
+  return parseFloat(str.replace(/,/g, '').replace('億', '').trim()) || 0;
+}
 let sortCol = 'total_capital';
 let sortDir = -1;
 
@@ -2540,10 +2586,16 @@ const STOCK_NAME = {};
 const STOCK_INDUSTRY = {};
 STOCK_LIST.forEach(([c, n, ind]) => { STOCK_NAME[c] = n; STOCK_INDUSTRY[c] = ind || ''; });
 
-let myPortfolio = new Set(JSON.parse(localStorage.getItem(PORTFOLIO_KEY) || '[]'));
+let myPortfolio = new Set();
 
 function savePortfolio() {
   localStorage.setItem(PORTFOLIO_KEY, JSON.stringify([...myPortfolio]));
+}
+
+function switchActiveGroup(idx) {
+  activeGroupIdx = idx;
+  renderETFCards();
+  restoreCardActiveStates();
 }
 
 function restoreCardActiveStates() {
@@ -2601,7 +2653,7 @@ async function savePortfolioModal() {
 
     // Sync to Firestore if logged in and function is available
     if (window._etfAuth?.user && window._firestore?.savePortfolioToFirestore) {
-      await window._firestore.savePortfolioToFirestore(window._etfAuth.user.uid);
+      await window._firestore.savePortfolioToFirestore(window._etfAuth.user.uid, window._etfAuth.user.email);
     }
 
     if (activeFilters.has('MY_PORTFOLIO') && myPortfolio.size === 0) activeFilters.delete('MY_PORTFOLIO');
@@ -3088,7 +3140,7 @@ if (typeof window.onNotesPageOpen === "function") window.onNotesPageOpen();
         if (storedData.length > 0) {
           myPortfolio = new Set(storedData);
           console.log('↗ Migrating from localStorage to Firestore:', [...myPortfolio]);
-          await setDoc(docRef, { stocks: [...myPortfolio], updatedAt: new Date() });
+          await setDoc(docRef, { stocks: [...myPortfolio], email: currentUser?.email || '', updatedAt: new Date() });
         } else {
           myPortfolio = new Set();
           console.log('→ New user, no existing portfolio');
@@ -3108,13 +3160,14 @@ if (typeof window.onNotesPageOpen === "function") window.onNotesPageOpen();
   }
 
   // ── Save portfolio to Firestore ──────────────────────────────────────────
-  async function savePortfolioToFirestore(uid) {
+  async function savePortfolioToFirestore(uid, email) {
     try {
       const docRef = doc(db, 'portfolios', uid);
       await setDoc(docRef, {
         stocks: [...myPortfolio],
+        email: email || '',
         updatedAt: new Date()
-      }, { merge: true });
+      });
       console.log('✓ Saved portfolio to Firestore:', [...myPortfolio]);
     } catch(err) {
       console.error('❌ Failed to save portfolio to Firestore:', err);
@@ -3137,6 +3190,11 @@ if (typeof window.onNotesPageOpen === "function") window.onNotesPageOpen();
     }
     else      {
       renderLoggedOut();
+      myPortfolio = new Set(JSON.parse(localStorage.getItem(PORTFOLIO_KEY) || '[]'));
+      renderETFCards();
+      restoreCardActiveStates();
+      renderTable();
+      renderUniqueTable();
     }
     updateInputArea(user);
     openCombinedModal(user);

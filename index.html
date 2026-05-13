@@ -1040,6 +1040,7 @@
   .ci-card-rem { border-color: var(--red);   opacity: 0.7; }
   .ci-card-up  { border-color: var(--green); }
   .ci-card-dn  { border-color: #fb923c; }
+  .ci-card-flat{ border-color: var(--text3); }
 
   .ci-ticker {
     font-family: var(--mono);
@@ -1698,7 +1699,7 @@
 <!-- ── Shared header ──────────────────────────────────────────────────── -->
 <div class="header" id="mainHeader">
   <h1>台灣 <span> ETF </span> 成分股交叉分析</h1>
-  <p class="header-sub">你的持股 + 主動式 + 被動式 &nbsp;|&nbsp; 點擊卡片開始分析 &nbsp;|&nbsp; 資料日期：<b>2026/05/13</b> &nbsp;</p>
+  <p class="header-sub">你的卡片 + 主動式 + 被動式 &nbsp;|&nbsp; 點擊卡片開始分析 &nbsp;|&nbsp; 資料日期：<b>2026/05/13</b> &nbsp;</p>
 </div>
 
 <!-- ── Notes input header (replaces main header on notes page) ── -->
@@ -1834,7 +1835,7 @@
      onclick="if(event.target===this)closePortfolioModal()">
   <div class="portfolio-modal">
     <div class="portfolio-modal-header">
-      <div class="portfolio-modal-title">設定我的持股</div>
+      <div class="portfolio-modal-title">設定我想追蹤</div>
       <button class="portfolio-modal-close" onclick="closePortfolioModal()">×</button>
     </div>
     <div class="portfolio-modal-body">
@@ -1850,7 +1851,7 @@
     </div>
     <div class="portfolio-modal-footer">
       <button class="portfolio-btn-cancel" onclick="closePortfolioModal()">取消</button>
-      <button class="portfolio-btn-save" id="btnSavePortfolio" onclick="handleSavePortfolio()">儲存持股</button>
+      <button class="portfolio-btn-save" id="btnSavePortfolio" onclick="handleSavePortfolio()">儲存追蹤</button>
     </div>
   </div>
 </div>
@@ -1911,7 +1912,7 @@ function renderETFCards() {
       return `
         <div class="portfolio-card-empty" onclick="openPortfolioModal()">
           <div class="pce-plus">+</div>
-          <div class="pce-label">新增持股</div>
+          <div class="pce-label">新增追蹤</div>
         </div>`;
     }
     const tickers = [...myPortfolio];
@@ -1921,9 +1922,9 @@ function renderETFCards() {
       <div class="etf-card" id="card-MY_PORTFOLIO"
            style="--card-color:#58a6ff" onclick="togglePortfolioFilter()">
         <div class="card-ticker" style="display:flex;justify-content:space-between;align-items:flex-start">
-          <span>我的持股</span>
+          <span>我想追蹤</span>
           <button style="background:none;border:none;color:var(--text);cursor:pointer;font-size:15px;padding:0;line-height:1;opacity:0.7;display:flex;align-items:center;gap:4px"
-                  onclick="event.stopPropagation();openPortfolioModal()" title="編輯持股">✎ 編輯</button>
+                  onclick="event.stopPropagation();openPortfolioModal()" title="編輯追蹤">✎ 編輯</button>
         </div>
         <div class="card-name">${tickers.length} 檔自選股</div>
         <div class="card-aum" style="font-size:18px">${tickers.length} 檔</div>
@@ -1992,7 +1993,7 @@ function renderStats(rows) {
       <div class="stat-value" style="font-size:16px">${formatCapital(totalCap)}</div>
     </div>
     <div class="stat-item">
-      <div class="stat-label">有持股資料卡片</div>
+      <div class="stat-label">有追蹤資料卡片</div>
       <div class="stat-value">${etfsWithData} 張</div>
     </div>
   `;
@@ -2093,7 +2094,7 @@ function renderTable() {
       <tr onclick="toggleExpand(${i}, '${r.ticker}')" data-idx="${i}">
         <td class="td-num" style="color:var(--text3);font-size:11px">${i+1}</td>
         <td class="td-ticker"><a class="stock-link" href="https://www.wantgoo.com/stock/${r.ticker}/technical-chart" target="_blank" rel="noopener" onclick="event.stopPropagation()">${r.ticker}</a></td>
-        <td class="td-name"><a class="stock-link" href="https://www.wantgoo.com/stock/${r.ticker}/technical-chart" target="_blank" rel="noopener" onclick="event.stopPropagation()">${r.name}</a>${isMyStock ? '<span class="portfolio-badge">持股</span>' : ''}</td>
+        <td class="td-name"><a class="stock-link" href="https://www.wantgoo.com/stock/${r.ticker}/technical-chart" target="_blank" rel="noopener" onclick="event.stopPropagation()">${r.name}</a>${isMyStock ? '<span class="portfolio-badge">追蹤</span>' : ''}</td>
         <td><span class="industry-tag">${industry}</span></td>
         <td>
           <div class="dot-row">${dots}<span style="font-family:var(--mono);font-size:13px;margin-left:4px;color:var(--text2)">${r.etf_count}</span></div>
@@ -2179,7 +2180,7 @@ function renderAIFeedback() {
   if (!etfs.length) { panel.innerHTML = ''; return; }
 
   const today = new Date().toLocaleDateString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit' });
-  panel.innerHTML = etfs.map(ticker => {
+  panel.innerHTML = [etfs[0]].map(ticker => {
     const card  = ETF_CARDS.find(c => c.ticker === ticker);
     if (!card) return '';
     const blurb = AI_BLURBS[ticker] || `持有 ${card.holdings_count} 檔成分股，詳見交叉分析表。`;
@@ -2398,21 +2399,40 @@ function renderRemoved(items) {
 
 function renderChanged(items) {
   if (!items.length) return '';
+  const sorted = items.slice().sort((a, b) => {
+    const da = a.to_weight - a.from_weight;
+    const db = b.to_weight - b.from_weight;
+    const sda = (a.from_shares && a.to_shares) ? (a.to_shares - a.from_shares) : null;
+    const sdb = (b.from_shares && b.to_shares) ? (b.to_shares - b.from_shares) : null;
+    const noShare = (sd) => sd === null || sd === 0;
+    const cat = (d, sd) => {
+      if (d === 0) return 4;
+      if (noShare(sd)) return d > 0 ? 2 : 3;
+      return d > 0 ? 0 : 1;
+    };
+    const ca = cat(da, sda), cb = cat(db, sdb);
+    if (ca !== cb) return ca - cb;
+    if (ca === 0 || ca === 2) return db - da;
+    if (ca === 1 || ca === 3) return da - db;
+    return 0;
+  });
   return `
     <div class="cs-label cs-label-chg">◆ 權重調整</div>
     <div class="ci-grid">
-      ${items.map(item => {
+      ${sorted.map(item => {
         const up   = item.to_weight > item.from_weight;
         const diff = (item.to_weight - item.from_weight).toFixed(2);
         const sign = up ? '+' : '';
-        const clr  = up ? 'var(--green)' : '#fb923c';
         const arr  = up ? '↑' : '↓';
         const fromShares = item.from_shares ? Math.round(item.from_shares / 1000) : null;
         const toShares = item.to_shares ? Math.round(item.to_shares / 1000) : null;
         const sharesDiff = fromShares && toShares ? (toShares - fromShares) : null;
         const sharesDir = sharesDiff ? (sharesDiff >= 0 ? '+' : '') : '';
+        const noShareChange = sharesDiff === null || sharesDiff === 0;
+        const clr = noShareChange ? 'var(--text3)' : (up ? 'var(--green)' : '#fb923c');
+        const cardCls = noShareChange ? 'ci-card-flat' : (up ? 'ci-card-up' : 'ci-card-dn');
         return `
-          <div class="ci-card ${up ? 'ci-card-up' : 'ci-card-dn'}">
+          <div class="ci-card ${cardCls}">
             <div class="ci-ticker" style="color:var(--accent)"><a class="stock-link" href="https://www.wantgoo.com/stock/${item.ticker}/technical-chart" target="_blank" rel="noopener">${item.ticker}</a></div>
             <div class="ci-name"><a class="stock-link" href="https://www.wantgoo.com/stock/${item.ticker}/technical-chart" target="_blank" rel="noopener">${item.name}</a></div>
             <div class="ci-wchange">
@@ -2425,7 +2445,7 @@ function renderChanged(items) {
               <span>${fromShares.toLocaleString('en-US')} 張</span>
               <span style="color:var(--text3)">→</span>
               <span style="font-weight:600">${toShares.toLocaleString('en-US')} 張</span>
-              <span style="color:${clr}">${sharesDir}${sharesDiff.toLocaleString('en-US')} 張</span>
+              ${sharesDiff !== 0 ? `<span style="color:${clr}">${sharesDir}${sharesDiff.toLocaleString('en-US')} 張</span>` : ''}
             </div>` : ''}
           </div>
         `;
@@ -2512,15 +2532,15 @@ function renderUniqueTable() {
           etfs: [],
           total_capital: null,
           total_shares: null,
-          exclusiveEtf: { etf_ticker: '我的持股', etf_name: '', color: '#58a6ff', weight: null },
+          exclusiveEtf: { etf_ticker: '我想追蹤', etf_name: '', color: '#58a6ff', weight: null },
         });
       }
     });
   }
 
   stocks.sort((a, b) => {
-    const aPort = a.exclusiveEtf.etf_ticker === '我的持股' ? 0 : 1;
-    const bPort = b.exclusiveEtf.etf_ticker === '我的持股' ? 0 : 1;
+    const aPort = a.exclusiveEtf.etf_ticker === '我想追蹤' ? 0 : 1;
+    const bPort = b.exclusiveEtf.etf_ticker === '我想追蹤' ? 0 : 1;
     if (aPort !== bPort) return aPort - bPort;
     return (b.total_capital ?? -1) - (a.total_capital ?? -1);
   });
@@ -2695,7 +2715,7 @@ function renderModalChips() {
                   border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
                   border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text2)">
         🔒 <b style="color:var(--text)">已達訪客上限（${PORTFOLIO_LIMIT_FREE} 檔）</b><br>
-        登入並同意條款最多可新增 ${PORTFOLIO_LIMIT_FULL} 檔持股
+        登入並同意條款最多可新增 ${PORTFOLIO_LIMIT_FULL} 檔追蹤
       </div>`;
   } else if (showUpgrade && needsTos) {
     upgradeHtml = `
@@ -2703,14 +2723,14 @@ function renderModalChips() {
                   border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
                   border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text2)">
         📋 <b style="color:var(--text)">已達基本上限（${PORTFOLIO_LIMIT_FREE} 檔）</b><br>
-        同意使用條款可擴充至 ${PORTFOLIO_LIMIT_FULL} 檔持股
+        同意使用條款可擴充至 ${PORTFOLIO_LIMIT_FULL} 檔追蹤
       </div>`;
   } else if (isFull) {
     upgradeHtml = `<div style="font-size:12px;color:var(--red);padding:2px 0 8px">已達上限（${limit} 檔）</div>`;
   }
 
   const chipsHtml = _tempPortfolio.size === 0
-    ? '<div style="color:var(--text3);font-size:12px;padding:4px 0">尚未新增任何持股</div>'
+    ? '<div style="color:var(--text3);font-size:12px;padding:4px 0">尚未新增任何追蹤</div>'
     : `<div class="pm-chips-grid">${
         [..._tempPortfolio].map(code => {
           const name = STOCK_NAME[code] || code;
